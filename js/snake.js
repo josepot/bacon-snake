@@ -25,7 +25,7 @@ function getNewPositionFromDirection(direction, lastPosition){
 function newSnake(oldSnake, growthLeft, direction) {
   var lastPosition = oldSnake.get(0);
   var newPosition = getNewPositionFromDirection(direction, lastPosition);
-  if(newPosition === lastPosition) return oldSnake;
+  if (newPosition === lastPosition) return oldSnake;
 
   var result = oldSnake.unshift(newPosition);
 

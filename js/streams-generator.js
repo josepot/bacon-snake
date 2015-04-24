@@ -46,12 +46,12 @@ function getDirectionStream(keyUp$, space$){
 
   return direction$.diff(null, function(prev, last){
     var lastTwo = [prev, last].sort().join('-');
-    return (['LEFT-RIGHT', 'DOWN-UP'].indexOf(lastTwo)>-1) ?
-      'SKIP':
-      last;
+    return (['LEFT-RIGHT', 'DOWN-UP'].indexOf(lastTwo) > -1) ?
+              'SKIP':
+              last;
   })
   .filter(function(d){
-    return d!=='SKIP';
+    return d !== 'SKIP';
   })
   .changes();
 }
