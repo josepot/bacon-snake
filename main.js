@@ -7,11 +7,14 @@ var ticker = require('./js/ticker.js');
 var snakeHelper = require('./js/snake.js');
 var getFood = require('./js/food.js');
 
+//EventStream variables end with $, i.e: ticks$
+//Propertie varibles end with $$, i.e: game$$
+
 //dimensions stream
-var load = $(window).asEventStream('load');
-var resize = $(window).asEventStream('resize');
-var dimensions =
-  load.merge(resize)
+var load$ = $(window).asEventStream('load');
+var resize$ = $(window).asEventStream('resize');
+var dimensions$ =
+  load$.merge(resize$)
       .map(function (){
         return {
           width: window.innerWidth * 2,
@@ -21,35 +24,46 @@ var dimensions =
       .map(getdimensions);
 
 $(document).on('ready', function(){
-  var ticks = ticker(100);
-  var keyUpStream = $(document)
-                  .asEventStream('keyup');
-  var arrows = keyUpStream.map(function(e){
-                    switch(e.which){
-                      case 37:
-                        return 'LEFT';
-                      case 38:
-                        return 'UP';
-                      case 39:
-                        return 'RIGHT';
-                      case 40:
-                        return 'DOWN';
-                      default:
-                        return null;
-                    }
-                  })
-                  .filter(R.compose(R.not, R.isNil));
-  var space = keyUpStream.map(function(e){
+  var ticks$ = ticker(100);
+  var keyUp$ = $(document).asEventStream('keyup');
+  var arrows$ = keyUp$.map(function(e){
+    switch(e.which){
+      case 37:
+        return 'LEFT';
+      case 38:
+        return 'UP';
+      case 39:
+        return 'RIGHT';
+      case 40:
+        return 'DOWN';
+      default:
+        return null;
+    }
+  }).filter(R.compose(R.not, R.isNil));
+
+  var space$ = keyUp$.map(function(e){
     return e.which === 32;
   }).filter(function(x){return x;});
 
-  var direction = Bacon.when(
-    [space], function(){return null;},
-    [arrows], function(a){return a;}
-  );
+  var direction$ = Bacon.when(
+    [space$], function(){return null;},
+    [arrows$], function(a){return a;}
+  )
+  .skipDuplicates();
 
-  var directionProp = direction.toProperty();
-  var dimensionsProp = dimensions.toProperty();
+  direction$ = direction$.diff(null, function(prev, last){
+    var lastTwo = [prev, last].sort().join('-');
+    return (['LEFT-RIGHT', 'DOWN-UP'].indexOf(lastTwo)>-1) ?
+      'SKIP':
+      last;
+  })
+  .filter(function(d){
+    return d!=='SKIP';
+  })
+  .changes();
+
+  var direction$$ = direction$.toProperty();
+  var dimensions$$ = dimensions$.toProperty();
 
   function resetGame(old){
     if(old && old.end===false) return old;
@@ -60,7 +74,7 @@ $(document).on('ready', function(){
       end: false
     };
   }
-  function updateGameProperties(old, ticks, direction, dimensions){
+  function updateGame(old, ticks, direction, dimensions){
     if(old.end===true) return old;
 
     var newSnake = snakeHelper.newSnake(old, direction);
@@ -83,17 +97,17 @@ $(document).on('ready', function(){
     };
   }
 
-  var gameProperties = Bacon.update(
+  var game$$ = Bacon.update(
     resetGame(),
-    [ticks, direction, dimensionsProp], updateGameProperties,
-    [ticks, directionProp, dimensionsProp], updateGameProperties,
-    [space], resetGame
+    [ticks$, direction$, dimensions$$], updateGame,
+    [ticks$, direction$$, dimensions$$], updateGame,
+    [space$], resetGame
   ).skipDuplicates();
 
   //Render when the dimensions or the gameProperties have changed
   var ctx = $('canvas')[0].getContext('2d');
   var render = renderer(ctx);
-  Bacon.onValues(dimensions, gameProperties, function(d, g){
-    render(d, g.snake, g.food);
+  Bacon.onValues(dimensions$, game$$, function(dimensions, game){
+    render(dimensions, game.snake, game.food);
   });
 });
