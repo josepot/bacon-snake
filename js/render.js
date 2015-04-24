@@ -1,13 +1,7 @@
 var R = require('ramda');
 var config = require('./config.js');
 
-var COLORS = {
-  FRAME: '#CBC3BA',
-  GAME: '#9BB07B',
-  SNAKE: '#3E462F',
-  TEXT: '#3E462F',
-  FOOD: '#3E462F'
-};
+var COLORS = config.COLORS;
 
 function renderFrame(ctx, x, y, width, height) {
   ctx.beginPath();
