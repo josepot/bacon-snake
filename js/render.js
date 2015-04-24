@@ -14,6 +14,7 @@ function renderFrame(ctx, x, y, width, height){
   ctx.fillStyle = COLORS.FRAME;
   ctx.fillRect(x, y, width, height);
 }
+
 function renderGamePort(ctx, rows, cols, squareLength, left, top){
   var width = squareLength * cols;
   var height = squareLength * rows;
@@ -22,12 +23,14 @@ function renderGamePort(ctx, rows, cols, squareLength, left, top){
   ctx.fillStyle = COLORS.GAME;
   ctx.fillRect(left, top, width, height);
 }
+
 function renderLength(ctx, fontSize, textPosition, length){
   ctx.font = (fontSize / 3) + 'pt Montserrat';
   ctx.textAlign = 'left';
   ctx.fillStyle = COLORS.TEXT;
   ctx.fillText("SCORE: " + length, textPosition.x, textPosition.y);
 }
+
 function renderSnake(ctx, squareLength, left, top, snake){
   snake.forEach(function(s){
     ctx.beginPath();
@@ -40,6 +43,7 @@ function renderSnake(ctx, squareLength, left, top, snake){
     );
   });
 }
+
 function renderFood(ctx, squareLength, left, top, food){
   ctx.beginPath();
   var rad = squareLength/2;

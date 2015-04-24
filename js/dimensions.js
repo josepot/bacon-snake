@@ -39,8 +39,10 @@ function getDimensions(rect){
   result.width = gameWidth * result.squareLength;
   result.height = gameHeight * result.squareLength;
   result.fontSize = (MARGIN.BOTTOM * result.squareLength)/2;
-  result.textPosition.x = result.widthPadding + (result.squareLength * MARGIN.LEFT * 2);
-  result.textPosition.y = result.squareLength * MARGIN.TOP + result.height * 0.76;
+  result.textPosition.x =
+    result.widthPadding + (result.squareLength * MARGIN.LEFT * 2);
+  result.textPosition.y =
+    result.squareLength * MARGIN.TOP + result.height * 0.76;
 
   return result;
 }

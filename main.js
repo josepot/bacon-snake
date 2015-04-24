@@ -15,6 +15,7 @@ var renderer = require('./js/render.js');
  * ************************************************/
 
 function main(){
+  //Event Streams
   var dimensions$ = streams.getDimensionsStream(
     $(window).asEventStream('load'),
     $(window).asEventStream('resize')
@@ -24,6 +25,7 @@ function main(){
   var space$ = streams.getSpaceStream(keyUp$);
   var direction$ = streams.getDirectionStream(keyUp$, space$);
 
+  //Properties
   var direction$$ = direction$.toProperty();
   var dimensions$$ = dimensions$.toProperty();
 
