@@ -34,7 +34,7 @@ function newSnake(oldSnake, growthLeft, direction) {
     result;
 }
 
-function isThereCoalition(snake, cols, rows) {
+function isThereCollision(snake, cols, rows) {
   var lastPosition = snake.get(0);
   if (lastPosition.x < 0 || lastPosition.y < 0 ||
     lastPosition.x >= cols || lastPosition.y >= rows) {
@@ -47,5 +47,5 @@ function isThereCoalition(snake, cols, rows) {
 
 module.exports = {
   newSnake: newSnake,
-  isThereCoalition: isThereCoalition
+  isThereCollision: isThereCollision
 };
