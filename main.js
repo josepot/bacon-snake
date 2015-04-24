@@ -1,11 +1,24 @@
 var R = require('ramda');
 var Bacon = require('baconjs');
 var Immutable = require('immutable');
-var dimentions = require('./js/dimentions.js');
+var getDimentions = require('./js/dimentions.js');
 var renderer = require('./js/render.js');
 var ticker = require('./js/ticker.js');
 var snakeHelper = require('./js/snake.js');
 var getFood = require('./js/food.js');
+
+
+var load = $(window).asEventStream('load');
+var resize = $(window).asEventStream('resize');
+var dimentions =
+  load.merge(resize)
+      .map(function (){
+        return {
+          width: window.innerWidth * 2,
+          height: window.innerHeight * 2
+        };
+      })
+      .map(getDimentions);
 
 $(document).on('ready', function(){
   var ctx = $('canvas')[0].getContext('2d');

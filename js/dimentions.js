@@ -54,15 +54,4 @@ function getDimentions(rect){
   return result;
 }
 
-var load = $(window).asEventStream('load');
-var resize = $(window).asEventStream('resize');
-
-module.exports =
-  load.merge(resize)
-      .map(function (){
-        return {
-          width: window.innerWidth * 3,
-          height: window.innerHeight * 3
-        };
-      })
-      .map(getDimentions);
+module.exports = getDimentions;
