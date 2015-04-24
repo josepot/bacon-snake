@@ -52,7 +52,7 @@ function main(){
     var newGrowthLeft = Math.max(old.growthLeft-1, 0);
     var newPosition = newSnake.get(0);
     var end =
-      snakeHelper.isThereCoalition(newSnake, config.COLS, config.ROWS);
+      snakeHelper.isThereCollision(newSnake, config.COLS, config.ROWS);
 
     if (!end && newPosition.x == old.food.x && newPosition.y == old.food.y) {
       newGrowthLeft += config.FOOD_INCREASE;
