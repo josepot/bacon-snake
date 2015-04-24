@@ -45,7 +45,7 @@ function main(){
   function updateGame(old, ticks, direction, dimensions){
     if(old.end===true) return old;
 
-    var newSnake = snakeHelper.newSnake(old, direction);
+    var newSnake = snakeHelper.newSnake(old.snake, old.growthLeft, direction);
     var newFood = old.food;
     var newGrowthLeft = Math.max(old.growthLeft-1, 0);
     var newPosition = newSnake.get(0);

@@ -2,26 +2,34 @@ var Immutable = require('immutable');
 var R = require('ramda');
 
 function getNewPositionFromDirection(direction, lastPosition){
+  var evolution = {};
   switch (direction) {
     case 'LEFT':
-      return R.evolve({x:R.add(-1)}, lastPosition);
+      evolution = {x:R.add(-1)};
+      break;
     case 'RIGHT':
-      return R.evolve({x:R.add(1)}, lastPosition);
+      evolution = {x:R.add(1)};
+      break;
     case 'UP':
-      return R.evolve({y:R.add(-1)}, lastPosition);
+      evolution = {y:R.add(-1)};
+      break;
     case 'DOWN':
-      return R.evolve({y:R.add(1)}, lastPosition);
+      evolution = {y:R.add(1)};
+      break;
+    default:
+      return lastPosition;
   }
+  return R.evolve(evolution, lastPosition);
 }
 
-function newSnake(old, direction) {
-  var lastPosition = old.snake.get(0);
+function newSnake(oldSnake, growthLeft, direction) {
+  var lastPosition = oldSnake.get(0);
   var newPosition = getNewPositionFromDirection(direction, lastPosition);
-  if(R.isNil(newPosition)) return old.snake;
+  if(newPosition === lastPosition) return oldSnake;
 
-  var result = old.snake.unshift(newPosition);
+  var result = oldSnake.unshift(newPosition);
 
-  return old.growthLeft === 0 ?
+  return growthLeft === 0 ?
     result.slice(0, result.size - 1) :
     result;
 }
