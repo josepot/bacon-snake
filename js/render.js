@@ -49,8 +49,8 @@ function renderFood(ctx, squareLength, left, top, food){
   ctx.fill();
 }
 
-function render(ctx, dimentions, snake, food){
-  var d = dimentions;
+function render(ctx, dimensions, snake, food){
+  var d = dimensions;
   ctx.canvas.width = d.outter.width;
   ctx.canvas.height = d.outter.height;
   ctx.clearRect(0, 0, d.outter.width, d.outter.height);
@@ -63,7 +63,6 @@ function render(ctx, dimentions, snake, food){
   renderLength(ctx, d.fontSize, d.textPosition, snake.size);
   renderSnake(ctx, d.squareLength, gamePortLeft, gamePortTop, snake);
   renderFood(ctx, d.squareLength, gamePortLeft, gamePortTop, food);
-  
 }
 
 module.exports = R.curry(render);

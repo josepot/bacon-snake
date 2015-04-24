@@ -9,7 +9,7 @@ var MARGIN = {
   LEFT: 1
 };
 
-function getDimentions(rect){
+function getDimensions(rect){
   var result = {
     squareLength: 0,
     width: 0,
@@ -54,4 +54,4 @@ function getDimentions(rect){
   return result;
 }
 
-module.exports = getDimentions;
+module.exports = getDimensions;

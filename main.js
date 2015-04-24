@@ -1,16 +1,16 @@
 var R = require('ramda');
 var Bacon = require('baconjs');
 var Immutable = require('immutable');
-var getDimentions = require('./js/dimentions.js');
+var getdimensions = require('./js/dimensions.js');
 var renderer = require('./js/render.js');
 var ticker = require('./js/ticker.js');
 var snakeHelper = require('./js/snake.js');
 var getFood = require('./js/food.js');
 
-
+//dimensions stream
 var load = $(window).asEventStream('load');
 var resize = $(window).asEventStream('resize');
-var dimentions =
+var dimensions =
   load.merge(resize)
       .map(function (){
         return {
@@ -18,11 +18,9 @@ var dimentions =
           height: window.innerHeight * 2
         };
       })
-      .map(getDimentions);
+      .map(getdimensions);
 
 $(document).on('ready', function(){
-  var ctx = $('canvas')[0].getContext('2d');
-  var render = renderer(ctx);
   var ticks = ticker(100);
   var keyUpStream = $(document)
                   .asEventStream('keyup');
@@ -51,30 +49,7 @@ $(document).on('ready', function(){
   );
 
   var directionProp = direction.toProperty();
-  var dimentionsProp = dimentions.toProperty();
-
-  function updateGameProperties(old, ticks, direction, dimentions){
-    if(old.end===true) return old;
-
-    var newSnake = snakeHelper.newSnake(old, direction);
-    var newFood = old.food;
-    var newGrowthLeft = Math.max(old.growthLeft-1, 0);
-    var newPosition = newSnake.get(0);
-    var end = snakeHelper.isThereCoalition(newSnake, dimentions.rows,
-                                           dimentions.cols);
-
-    if(!end && newPosition.x == old.food.x && newPosition.y == old.food.y){
-      newGrowthLeft += 3;
-      newFood = getFood(newSnake.toArray(), dimentions.rows, dimentions.cols);
-    }
-
-    return {
-      snake: newSnake,
-      food: newFood,
-      growthLeft: newGrowthLeft,
-      end: end
-    };
-  }
+  var dimensionsProp = dimensions.toProperty();
 
   function resetGame(old){
     if(old && old.end===false) return old;
@@ -85,15 +60,40 @@ $(document).on('ready', function(){
       end: false
     };
   }
+  function updateGameProperties(old, ticks, direction, dimensions){
+    if(old.end===true) return old;
+
+    var newSnake = snakeHelper.newSnake(old, direction);
+    var newFood = old.food;
+    var newGrowthLeft = Math.max(old.growthLeft-1, 0);
+    var newPosition = newSnake.get(0);
+    var end = snakeHelper.isThereCoalition(newSnake, dimensions.rows,
+                                           dimensions.cols);
+
+    if(!end && newPosition.x == old.food.x && newPosition.y == old.food.y){
+      newGrowthLeft += 3;
+      newFood = getFood(newSnake.toArray(), dimensions.rows, dimensions.cols);
+    }
+
+    return {
+      snake: newSnake,
+      food: newFood,
+      growthLeft: newGrowthLeft,
+      end: end
+    };
+  }
 
   var gameProperties = Bacon.update(
     resetGame(),
-    [ticks, direction, dimentionsProp], updateGameProperties,
-    [ticks, directionProp, dimentionsProp], updateGameProperties,
+    [ticks, direction, dimensionsProp], updateGameProperties,
+    [ticks, directionProp, dimensionsProp], updateGameProperties,
     [space], resetGame
   ).skipDuplicates();
 
-  Bacon.onValues(dimentions, gameProperties, function(d, g){
+  //Render when the dimensions or the gameProperties have changed
+  var ctx = $('canvas')[0].getContext('2d');
+  var render = renderer(ctx);
+  Bacon.onValues(dimensions, gameProperties, function(d, g){
     render(d, g.snake, g.food);
   });
 });
