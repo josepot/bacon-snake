@@ -1,5 +1,6 @@
 var getdimensions = require('./dimensions.js');
 var Bacon = require('baconjs');
+var R = require('ramda');
 
 function getDimensionsStream(load$, resize$){
   return load$.merge(resize$)

@@ -2,22 +2,25 @@ var R = require('ramda');
 var Bacon = require('baconjs');
 var Immutable = require('immutable');
 
+var config = require('./js/config.js');
 var streams = require('./js/streams-generator.js');
 var ticker = require('./js/ticker.js');
 var snakeHelper = require('./js/snake.js');
-var getFood = require('./js/food.js');
+var getEmptyPosition = require('./js/food.js');
 var renderer = require('./js/render.js');
 
-//EventStream variables end with $, i.e: ticks$
-//Propertie varibles end with $$, i.e: game$$
+/**************************************************
+ * EventStream variables end with $, i.e: `ticks$ *
+ * Properties end with $$, i.e: `game$$`          *
+ * ************************************************/
 
 function main(){
   var dimensions$ = streams.getDimensionsStream(
     $(window).asEventStream('load'),
     $(window).asEventStream('resize')
   );
-  var ticks$ = ticker(100);
-  var keyUp$ = $(document).asEventStream('keyup');
+  var ticks$ = ticker(config.TICK_FREQUENCY);
+  var keyUp$ = $(window).asEventStream('keyup');
   var space$ = streams.getSpaceStream(keyUp$);
   var direction$ = streams.getDirectionStream(keyUp$, space$);
 
@@ -26,9 +29,12 @@ function main(){
 
   function resetGame(old){
     if(old && old.end===false) return old;
+    var snake = Immutable.List.of(
+      getEmptyPosition([], config.COLS, config.ROWS)
+    );
     return {
-      snake: Immutable.List.of({x:0, y:0}),
-      food : getFood([{x:0, y:0}], 20, 20),
+      snake: snake,
+      food : getEmptyPosition(snake.toArray(), config.COLS, config.ROWS),
       growthLeft: 0,
       end: false
     };
@@ -41,12 +47,15 @@ function main(){
     var newFood = old.food;
     var newGrowthLeft = Math.max(old.growthLeft-1, 0);
     var newPosition = newSnake.get(0);
-    var end = snakeHelper.isThereCoalition(newSnake, dimensions.rows,
-                                           dimensions.cols);
+    var end =
+      snakeHelper.isThereCoalition(newSnake, config.COLS, config.ROWS);
+
     if(!end && newPosition.x == old.food.x && newPosition.y == old.food.y){
-      newGrowthLeft += 4;
-      newFood = getFood(newSnake.toArray(), dimensions.rows, dimensions.cols);
+      newGrowthLeft += config.FOOD_INCREASE;
+      newFood =
+        getEmptyPosition(newSnake.toArray(), config.COLS, config.ROWS);
     }
+
     return {
       snake: newSnake,
       food: newFood,

@@ -1,13 +1,9 @@
 var Bacon = require('baconjs');
+var config = require('./config.js');
 
-var ROWS = 20;
-var COLS = 30;
-var MARGIN = {
-  TOP: 1,
-  RIGHT: 1,
-  BOTTOM: 4,
-  LEFT: 1
-};
+var ROWS = config.ROWS;
+var COLS = config.COLS;
+var MARGIN = config.MARGIN;
 
 function getDimensions(rect){
   var result = {
@@ -18,9 +14,6 @@ function getDimensions(rect){
     heightPadding: 0,
     fontSize: 0,
     outter: rect,
-    rows: ROWS,
-    cols: COLS,
-    margin: MARGIN,
     textPosition: {
       x:0,
       y:0

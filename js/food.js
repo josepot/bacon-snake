@@ -1,6 +1,6 @@
 var R = require('ramda');
 
-function getFoodPosition(snakePositions, rows, cols){
+function getFoodPosition(snakePositions, cols, rows){
   var candidates =
     R.flatten(
     R.range(0, cols)

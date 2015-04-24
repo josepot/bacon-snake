@@ -29,7 +29,7 @@ function newSnake(old, direction){
           positions;
 }
 
-function isThereCoalition(snake, rows, cols){
+function isThereCoalition(snake, cols, rows){
   var lastPosition = snake.get(0);
   if(lastPosition.x < 0 || lastPosition.y <0 ||
      lastPosition.x >= cols || lastPosition.y>=rows){

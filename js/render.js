@@ -1,4 +1,5 @@
-R = require('ramda');
+var R = require('ramda');
+var config = require('./config.js');
 
 var COLORS = {
   FRAME: '#FF0000',
@@ -56,9 +57,9 @@ function render(ctx, dimensions, snake, food){
   ctx.clearRect(0, 0, d.outter.width, d.outter.height);
   renderFrame(ctx, d.widthPadding,d.heightPadding, d.width, d.height);
 
-  var gamePortLeft  = d.widthPadding + (d.squareLength * d.margin.LEFT);
-  var gamePortTop = d.heightPadding + (d.squareLength * d.margin.TOP);
-  renderGamePort(ctx, d.rows, d.cols, d.squareLength,
+  var gamePortLeft  = d.widthPadding + (d.squareLength * config.MARGIN.LEFT);
+  var gamePortTop = d.heightPadding + (d.squareLength * config.MARGIN.TOP);
+  renderGamePort(ctx, config.ROWS, config.COLS, d.squareLength,
                  gamePortLeft, gamePortTop);
   renderLength(ctx, d.fontSize, d.textPosition, snake.size);
   renderSnake(ctx, d.squareLength, gamePortLeft, gamePortTop, snake);
