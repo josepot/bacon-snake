@@ -74,6 +74,7 @@ $(document).on('ready', function(){
       end: false
     };
   }
+
   function updateGame(old, ticks, direction, dimensions){
     if(old.end===true) return old;
 
@@ -83,12 +84,10 @@ $(document).on('ready', function(){
     var newPosition = newSnake.get(0);
     var end = snakeHelper.isThereCoalition(newSnake, dimensions.rows,
                                            dimensions.cols);
-
     if(!end && newPosition.x == old.food.x && newPosition.y == old.food.y){
       newGrowthLeft += 3;
       newFood = getFood(newSnake.toArray(), dimensions.rows, dimensions.cols);
     }
-
     return {
       snake: newSnake,
       food: newFood,
@@ -98,13 +97,22 @@ $(document).on('ready', function(){
   }
 
   var game$$ = Bacon.update(
+    //initial Value
     resetGame(),
+
+    //syncing the direction$ with the ticks$: which means that new values have
+    //been added to the direction$ stream before the tick
     [ticks$, direction$, dimensions$$], updateGame,
+
+    //this means that the tick has happen and the "direction$ buffer" is empty
+    //in other words, no changes in the direction between one before the last tick
     [ticks$, direction$$, dimensions$$], updateGame,
+
+    //the user hit the space bar
     [space$], resetGame
   ).skipDuplicates();
 
-  //Render when the dimensions or the gameProperties have changed
+  //Render will happen any time the dimension$ or the game$ change
   var ctx = $('canvas')[0].getContext('2d');
   var render = renderer(ctx);
   Bacon.onValues(dimensions$, game$$, function(dimensions, game){
