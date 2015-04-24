@@ -1,11 +1,11 @@
 R = require('ramda');
 
 var COLORS = {
-  FRAME: '#FF0000',
-  GAME: '#00FF00',
-  SNAKE: '#FFFFFF',
-  TEXT: '#000000',
-  FOOD: '#FFFF00'
+  FRAME: '#CBC3BA',
+  GAME: '#9BB07B',
+  SNAKE: '#3E462F',
+  TEXT: '#3E462F',
+  FOOD: '#3E462F'
 };
 
 function renderFrame(ctx, x, y, width, height){
@@ -22,10 +22,10 @@ function renderGamePort(ctx, rows, cols, squareLength, left, top){
   ctx.fillRect(left, top, width, height);
 }
 function renderLength(ctx, fontSize, textPosition, length){
-  ctx.font = fontSize + 'pt Arial';
-  ctx.textAlign = 'center';
+  ctx.font = (fontSize / 3) + 'pt Montserrat';
+  ctx.textAlign = 'left';
   ctx.fillStyle = COLORS.TEXT;
-  ctx.fillText("Snake length: " + length, textPosition.x, textPosition.y);
+  ctx.fillText("SCORE: " + length, textPosition.x, textPosition.y);
 }
 function renderSnake(ctx, squareLength, left, top, snake){
   snake.forEach(function(s){
@@ -54,15 +54,15 @@ function render(ctx, dimensions, snake, food){
   ctx.canvas.width = d.outter.width;
   ctx.canvas.height = d.outter.height;
   ctx.clearRect(0, 0, d.outter.width, d.outter.height);
-  renderFrame(ctx, d.widthPadding,d.heightPadding, d.width, d.height);
+  renderFrame(ctx, d.widthPadding, 0, d.width, d.height);
 
   var gamePortLeft  = d.widthPadding + (d.squareLength * d.margin.LEFT);
-  var gamePortTop = d.heightPadding + (d.squareLength * d.margin.TOP);
+  var gamePortTop = d.squareLength * d.margin.TOP;
   renderGamePort(ctx, d.rows, d.cols, d.squareLength,
                  gamePortLeft, gamePortTop);
-  renderLength(ctx, d.fontSize, d.textPosition, snake.size);
   renderSnake(ctx, d.squareLength, gamePortLeft, gamePortTop, snake);
   renderFood(ctx, d.squareLength, gamePortLeft, gamePortTop, food);
+  renderLength(ctx, d.fontSize, d.textPosition, snake.size);
 }
 
 module.exports = R.curry(render);
