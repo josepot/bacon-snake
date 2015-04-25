@@ -1,6 +1,8 @@
-var getdimensions = require('./dimensions.js');
 var Bacon = require('baconjs');
 var R = require('ramda');
+
+var getdimensions = require('./dimensions.js');
+var constants = require('./constants.js');
 
 function getDimensionsStream(load$, resize$){
   return load$.merge(resize$)
@@ -23,18 +25,7 @@ function getSpaceStream(keyUp$){
 
 function getDirectionStream(keyUp$, space$){
   var arrows$ = keyUp$.map(function(e){
-    switch(e.which){
-      case 37:
-        return 'LEFT';
-      case 38:
-        return 'UP';
-      case 39:
-        return 'RIGHT';
-      case 40:
-        return 'DOWN';
-      default:
-        return null;
-    }
+    return constants.KEYBOARD_DIRECTIONS[e.which];
   })
   .filter(R.compose(R.not, R.isNil));
 
