@@ -44,7 +44,7 @@ function main(){
     };
   }
 
-  function updateGame(old, ticks, direction, dimensions){
+  function updateGame(old, ticks, direction){
     if (old.end === true) return old;
 
     var newSnake = snakeHelper.newSnake(old.snake, old.growthLeft, direction);
@@ -74,11 +74,11 @@ function main(){
 
     //syncing the direction$ with the ticks$: which means that new value/s have
     //been added to the direction$ stream before the tick
-    [ticks$, direction$, dimensions$$], updateGame,
+    [ticks$, direction$], updateGame,
 
     //this means that the tick has happen and the "direction$ buffer" is empty
     //in other words: no changes in the direction that haven't been processed
-    [ticks$, direction$$, dimensions$$], updateGame,
+    [ticks$, direction$$], updateGame,
 
     //the user hit the space bar
     [space$], resetGame
