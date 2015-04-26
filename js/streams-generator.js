@@ -47,8 +47,19 @@ function getDirectionStream(keyUp$, space$){
   .changes();
 }
 
+function getTicksStream(ms){
+  return Bacon.repeat(function() {
+      return Bacon.fromCallback(window.requestAnimationFrame);
+    })
+    .map(function(domMs) {
+      return (domMs / ms) | 0;
+    })
+    .skipDuplicates();
+}
+
 module.exports = {
   getDimensionsStream: getDimensionsStream,
   getSpaceStream: getSpaceStream,
-  getDirectionStream: getDirectionStream
+  getDirectionStream: getDirectionStream,
+  getTicksStream: getTicksStream
 };

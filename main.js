@@ -4,7 +4,6 @@ var Immutable = require('immutable');
 
 var config = require('./js/config.js');
 var streams = require('./js/streams-generator.js');
-var ticker = require('./js/ticker.js');
 var snakeHelper = require('./js/snake.js');
 var getEmptyPosition = require('./js/food.js');
 var renderer = require('./js/render.js');
@@ -22,7 +21,7 @@ function main(){
     $(window).asEventStream('load'),
     $(window).asEventStream('resize')
   );
-  var ticks$ = ticker(config.TICK_FREQUENCY);
+  var ticks$ = streams.getTicksStream(config.TICK_FREQUENCY);
   var keyUp$ = $(window).asEventStream('keyup');
   var space$ = streams.getSpaceStream(keyUp$);
   var direction$ = streams.getDirectionStream(keyUp$, space$);
