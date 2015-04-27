@@ -3,6 +3,7 @@ var Bacon = require('baconjs');
 var Immutable = require('immutable');
 
 var config = require('./js/config.js');
+var helper = require('./js/helpers.js');
 var streams = require('./js/streams-generator.js');
 var getSnakeAndFood = require('./js/snake-food.js');
 var renderer = require('./js/render.js');
@@ -19,15 +20,21 @@ function main(){
     $(window).asEventStream('load'),
     $(window).asEventStream('resize')
   );
-  var ticks$ = streams.getTicksStream(config.TICK_FREQUENCY);
   var keyUp$ = $(window).asEventStream('keyup');
   var space$ = streams.getSpaceStream(keyUp$);
   var direction$ = streams.getDirectionStream(keyUp$, space$);
-  var dimensions$$ = dimensions$.toProperty();
-
+  var gameActive$ = new Bacon.Bus();
+  var ticks$ = streams.getTicksStream(config.TICK_FREQUENCY, gameActive$)
+               .skipUntil(direction$);
   var snakeAndFood = getSnakeAndFood(ticks$, direction$);
   var snake$$ = snakeAndFood.snake$$;
   var food$$ = snakeAndFood.food$$;
+
+  gameActive$.plug(
+    snake$$.map(function(snake){
+      return !helper.isThereCollision(snake, config.COLS, config.ROWS);
+    }).skipDuplicates().changes()
+  );
 
   var ctx = $('canvas')[0].getContext('2d');
   var render = renderer(ctx);

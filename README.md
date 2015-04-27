@@ -8,7 +8,7 @@
 
 ## instructions
 
-- Open `index.html` (I've only tried it with Chrome so far)
+- Open `index.html`
 - Press one of the arrow buttons to start playing
 - Press space to pause
-- If you crash press space to restart
+- If you crash refresh the page (for now)
