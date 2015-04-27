@@ -47,14 +47,18 @@ function getDirectionStream(keyUp$, space$){
   .changes();
 }
 
-function getTicksStream(ms){
-  return Bacon.repeat(function() {
-      return Bacon.fromCallback(window.requestAnimationFrame);
-    })
-    .map(function(domMs) {
-      return (domMs / ms) | 0;
-    })
-    .skipDuplicates();
+function getTicksStream(ms, gameActive$){
+  var active = true;
+  gameActive$.onValue(function(act){
+    active=act;
+    if(!active) return Bacon.noMore;
+  });
+
+  return Bacon.repeat(function(){
+    return active ?
+      Bacon.later(ms, 1) :
+      false;
+  });
 }
 
 module.exports = {
