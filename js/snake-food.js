@@ -19,47 +19,50 @@ function getNextHeadPosition(prev, direction){
 function snakeAndFood(ticks$, direction$){
   var direction$$ = direction$.toProperty();
   var initialHead = getAvailablePosition([]);
+  var decreaseUntilZero = R.pipe(R.dec, R.curryN(2, Math.max)(0));
+  var increaseIfBufferIsNotEmpty = R.cond(
+      [R.eq(0), R.nthArg(1)],
+      [R.T, R.pipe(R.nthArg(1),R.add(1))]
+    );
 
-  var head$$ = Bacon.update(
+  var head$ = Bacon.update(
     initialHead,
     [direction$, ticks$], getNextHeadPosition,
     [direction$$, ticks$], getNextHeadPosition
-  ).skipDuplicates();
-  var head$ = head$$.changes();
+  )
+  .skipDuplicates()
+  .changes();
 
-  var growth$ = new Bacon.Bus();
+  var eatenFood$ = new Bacon.Bus();
   var growthBuffer$$ = Bacon.update(
     0,
-    [growth$], R.pipe(R.add, R.add(1)),
-    [head$], R.pipe(R.dec, R.curryN(2, Math.max)(0))
+    [eatenFood$], R.add(config.FOOD_INCREASE+1),
+    [head$], decreaseUntilZero
   ).skipDuplicates();
   var length$$ = Bacon.update(
     1,
-    [growthBuffer$$, head$], function(old, buffer){
-      return buffer===0 ? old : old + 1;
-    }
+    [growthBuffer$$, head$], R.flip(increaseIfBufferIsNotEmpty)
   ).skipDuplicates();
 
   var snake$$ = Bacon.update(
     Immutable.List.of(initialHead),
     [head$, length$$], function(old, head, len){
       var result = old.unshift(head);
-      return len===result.size?
+      return len === result.size ?
               result :
-              result.slice(0, result.size-1);
+              result.pop();
     }
   );
 
   var food$$ = Bacon.update(
     getAvailablePosition([initialHead]),
     [head$, snake$$], function(food, head, snake){
-      if(R.eqDeep(food, head)){
-        growth$.push(config.FOOD_INCREASE);
-        return getAvailablePosition(snake.toArray());
-      }
-      return food;
+      return R.eqDeep(food, head) ?
+              getAvailablePosition(snake.toArray()) :
+              food;
     }
   ).skipDuplicates();
+  eatenFood$.plug(food$$.changes());
 
   return {
     snake$$: snake$$,
