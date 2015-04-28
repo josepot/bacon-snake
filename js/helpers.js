@@ -1,4 +1,5 @@
 var R = require('ramda');
+var constants = require('./constants.js');
 
 function getAvailablePosition(snakePositions, cols, rows) {
   var candidates =
@@ -31,8 +32,16 @@ function isThereCollision(snake, cols, rows) {
     return a.x === b.x && a.y === b.y;
   }, lastPosition, snake.slice(1).toArray());
 }
+function getNextHeadPosition(prev, direction, ticks){
+  if(R.isNil(direction)) return prev;
+  return R.evolve(
+    R.mapObj(R.add, constants.DIRECTIONS_MUTATIONS[direction]),
+    prev
+  );
+}
 
 module.exports = {
   getAvailablePosition: getAvailablePosition,
-  isThereCollision: isThereCollision
+  isThereCollision: isThereCollision,
+  getNextHeadPosition: getNextHeadPosition
 };

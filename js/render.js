@@ -59,9 +59,13 @@ function render(ctx, dimensions, snake, food) {
   var gamePortTop = d.squareLength * config.MARGIN.TOP;
   renderGamePort(ctx, config.ROWS, config.COLS, d.squareLength,
     gamePortLeft, gamePortTop);
-  renderSnake(ctx, d.squareLength, gamePortLeft, gamePortTop, snake);
-  renderFood(ctx, d.squareLength, gamePortLeft, gamePortTop, food);
-  renderLength(ctx, d.fontSize, d.textPosition, snake.size);
+
+  if(!R.isNil(food))
+    renderFood(ctx, d.squareLength, gamePortLeft, gamePortTop, food);
+  if(!R.isNil(snake)){
+    renderSnake(ctx, d.squareLength, gamePortLeft, gamePortTop, snake);
+    renderLength(ctx, d.fontSize, d.textPosition, snake.size);
+  }
 }
 
 module.exports = R.curry(render);
