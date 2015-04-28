@@ -47,23 +47,23 @@ function getDirectionStream(keyUp$, space$){
   .changes();
 }
 
-function getTicksStream(ms, gameActive$){
-  var active = true;
-  gameActive$.onValue(function(act){
-    active=act;
-    if(!active) return Bacon.noMore;
-  });
-
-  return Bacon.repeat(function(){
-    return active ?
-      Bacon.later(ms, 1) :
-      false;
-  });
-}
+var ticks = function(){
+  var vm = this;
+  vm.active = true;
+  vm.start = function(ms){
+    vm.active = true;
+    return Bacon.repeat(function(){
+      return vm.active ?
+        Bacon.later(ms, 1) :
+        false;
+    });
+  };
+  vm.stop = function(){vm.active = false;};
+};
 
 module.exports = {
   getDimensionsStream: getDimensionsStream,
   getSpaceStream: getSpaceStream,
   getDirectionStream: getDirectionStream,
-  getTicksStream: getTicksStream
+  ticks: ticks
 };
