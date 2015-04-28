@@ -1,8 +1,9 @@
 var Bacon = require('baconjs');
 var R = require('ramda');
-
 var getdimensions = require('./dimensions.js');
+var config = require('./config.js');
 var constants = require('./constants.js');
+var helpers = require('./helpers.js');
 
 function getDimensionsStream(load$, resize$){
   return load$.merge(resize$)
@@ -47,23 +48,32 @@ function getDirectionStream(keyUp$, space$){
   .changes();
 }
 
-var ticks = function(){
-  var vm = this;
-  vm.active = true;
-  vm.start = function(ms){
-    vm.active = true;
-    return Bacon.repeat(function(){
-      return vm.active ?
-        Bacon.later(ms, 1) :
-        false;
-    });
-  };
-  vm.stop = function(){vm.active = false;};
-};
+function getTicksStream(ms){
+  var start = Date.now();
+  return Bacon.repeat(function(){
+    return Bacon.later(ms, Date.now()-start);
+  });
+}
+
+function getHeadStream(direction$, ticks$, gameStart$){
+  var getAvailablePosition = R.nAry(0,
+    R.partial(helpers.getAvailablePosition, [], config.COLS, config.ROWS));
+  var direction$$ = direction$.toProperty();
+
+  return Bacon.update(
+    null,
+    [gameStart$], getAvailablePosition,
+    [direction$, ticks$], helpers.getNextHeadPosition,
+    [direction$$, ticks$], helpers.getNextHeadPosition
+  )
+  .skipDuplicates()
+  .changes();
+}
 
 module.exports = {
   getDimensionsStream: getDimensionsStream,
   getSpaceStream: getSpaceStream,
   getDirectionStream: getDirectionStream,
-  ticks: ticks
+  getTicksStream: getTicksStream,
+  getHeadStream: getHeadStream
 };
