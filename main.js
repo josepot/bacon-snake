@@ -42,6 +42,8 @@ function main(){
   var snake$$ = snakeAndFood.snake$$;
   var food$$ = snakeAndFood.food$$;
 
+  var startNewGame$ = space$.filter(gameActive$$.not());
+
   var ctx = $('canvas')[0].getContext('2d');
   var render = renderer(ctx);
   Bacon
@@ -49,10 +51,10 @@ function main(){
     render(dimensions, snake, food);
     if(snake && helper.isThereCollision(snake, config.COLS, config.ROWS)){
      gameEnd$.push(Date.now());
-     gameStart$.push(Date.now());
     }
   });
   gameStart$.push(Date.now());
+  gameStart$.plug(startNewGame$.map(Date.now()));
 }
 
 $(main);
