@@ -13,7 +13,19 @@ var increaseIfBufferIsNotEmpty = R.cond(
   [R.T, R.pipe(R.nthArg(1),R.add(1))]
 );
 
-function snakeAndFood(head$, gameEnd$){
+function snakeAndFood(direction$, ticks$, gameStart$){
+  var direction$$ = direction$.toProperty();
+
+  //the position of the head of the snake
+  var head$ = Bacon.update(
+    null,
+    [gameStart$], R.nAry(0, R.partial(getAvailablePosition, [])),
+    [direction$, ticks$], helpers.getNextHeadPosition,
+    [direction$$, ticks$], helpers.getNextHeadPosition
+  )
+  .skipDuplicates()
+  .changes();
+
   //this is actually a 'stepper' of the food that gets eaten by the snake
   var eatenFood$ = new Bacon.Bus();
 
@@ -23,15 +35,15 @@ function snakeAndFood(head$, gameEnd$){
   //it will increase every time the snake eats
   var growthBuffer$$ = Bacon.update(
     0-(config.FOOD_INCREASE+1),
-    [gameEnd$], R.always(0-(config.FOOD_INCREASE+1)),
+    [head$, gameStart$], R.always(0-(config.FOOD_INCREASE+1)),
     [eatenFood$], R.add(config.FOOD_INCREASE+1),
-    [head$], function(old){return old<1?old:old-1;}
+    [head$], R.cond([R.gt(1), R.identity], [R.T, R.dec])
   ).skipDuplicates();
 
   //The current length of the snake
   var length$$ = Bacon.update(
     1,
-    [gameEnd$], R.always(1),
+    [head$, gameStart$], R.always(1),
     [growthBuffer$$, head$], R.flip(increaseIfBufferIsNotEmpty)
   ).skipDuplicates();
 
@@ -40,9 +52,8 @@ function snakeAndFood(head$, gameEnd$){
   //(including its head)
   var snake$$ = Bacon.update(
     null,
-    [gameEnd$], R.always(null),
+    [head$, gameStart$], function(old, head){return Immutable.List.of(head);},
     [head$, length$$], function(old, head, len){
-      if(R.isNil(old)) return Immutable.List.of(head);
       var result = old.unshift(head);
       return len === result.size ?
               result :
@@ -53,9 +64,11 @@ function snakeAndFood(head$, gameEnd$){
   //the position of food
   var food$$ = Bacon.update(
     null,
-    [gameEnd$], R.always(null),
+    [snake$$, head$, gameStart$], function(old, snake){
+                                   return getAvailablePosition(snake.toArray());
+    },
     [head$, snake$$], function(food, head, snake){
-      return R.isNil(food) || R.eqDeep(food, head) ?
+      return R.eqDeep(food, head) ?
               getAvailablePosition(snake.toArray()) :
               food;
     }
