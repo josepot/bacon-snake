@@ -1,4 +1,5 @@
 var Bacon = require('baconjs');
+var R = require('ramda');
 
 var config = require('./js/config.js');
 var helper = require('./js/helpers.js');
@@ -24,19 +25,20 @@ function main(){
   var gameStart$ = new Bacon.Bus();
   var gameEnd$ = new Bacon.Bus();
   var gameEvents$ = gameStart$.map('START').merge(gameEnd$.map('END'));
-  var gameActive$$ = gameEvents$.scan(false, function(prev, current){
-    return current==='START';
-  });
+  var gameActive$$ = gameEvents$.scan(false, R.flip(R.eq('START')));
+  var paused$$ = space$.filter(gameActive$$)
+                       .scan(false, R.not);
 
-  var direction$ = streams.getDirectionStream(keyUp$, space$)
+  var direction$ = streams.getDirectionStream(keyUp$, gameEnd$)
                           .filter(gameActive$$)
+                          .filter(paused$$.not())
                           .merge(gameEnd$.map(null));
   var ticks$ = streams.getTicksStream(config.TICK_FREQUENCY)
                       .skipUntil(direction$)
-                      .filter(gameActive$$);
+                      .filter(gameActive$$)
+                      .filter(paused$$.not());
 
-  var head$ = streams.getHeadStream(direction$, ticks$, gameStart$);
-  var snakeAndFood = getSnakeAndFood(head$, gameEnd$);
+  var snakeAndFood = getSnakeAndFood(direction$, ticks$, gameStart$);
   var snake$$ = snakeAndFood.snake$$;
   var food$$ = snakeAndFood.food$$;
 
