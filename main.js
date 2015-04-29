@@ -29,10 +29,10 @@ function main(){
   var paused$$ = space$.filter(gameActive$$)
                        .scan(false, R.not);
 
-  var direction$ = streams.getDirectionStream(keyUp$, gameEnd$)
-                          .filter(gameActive$$)
-                          .filter(paused$$.not())
-                          .merge(gameEnd$.map(null));
+  var direction$ = streams.getDirectionStream(
+                      keyUp$.filter(gameActive$$)
+                            .filter(paused$$.not()),
+                      gameEnd$);
   var ticks$ = streams.getTicksStream(config.TICK_FREQUENCY)
                       .skipUntil(direction$)
                       .filter(gameActive$$)
