@@ -39,7 +39,7 @@ function getDimensions(rect) {
   result.textPosition.x =
     result.widthPadding + (result.squareLength * MARGIN.LEFT * 2);
   result.textPosition.y =
-    result.squareLength * MARGIN.TOP + result.height * 0.76;
+    result.squareLength * MARGIN.TOP + result.height * 0.89;
 
   return result;
 }
