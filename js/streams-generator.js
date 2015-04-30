@@ -16,10 +16,9 @@ function getDimensionsStream(load$, resize$){
     .map(getdimensions);
 }
 
-function getSpaceStream(keyUp$){
+function getKeyStream(keyUp$, key){
   return keyUp$
-    .map(R.pipe(R.prop('which'), R.eq(32)))
-    .filter(R.identity);
+    .filter(R.pipe(R.prop('which'), R.eq(key)));
 }
 
 function getDirectionStream(keyUp$, gameEnd$){
@@ -49,7 +48,7 @@ function getTicksStream(ms){
 
 module.exports = {
   getDimensionsStream: getDimensionsStream,
-  getSpaceStream: getSpaceStream,
+  getKeyStream: getKeyStream,
   getDirectionStream: getDirectionStream,
   getTicksStream: getTicksStream
 };

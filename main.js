@@ -2,10 +2,13 @@ var Bacon = require('baconjs');
 var R = require('ramda');
 
 var config = require('./js/config.js');
-var helper = require('./js/helpers.js');
+var constants = require('./js/constants.js');
+var helpers = require('./js/helpers.js');
 var streams = require('./js/streams-generator.js');
 var getSnakeAndFood = require('./js/snake-food.js');
 var renderer = require('./js/render.js');
+var getAvailablePosition =
+  R.partial(helpers.getAvailablePosition,[] ,config.COLS, config.ROWS);
 
 /**************************************************
  *         VARIABLES NAMING CONVENTION            *
@@ -16,7 +19,7 @@ var renderer = require('./js/render.js');
 
 function main(){
   var keyUp$ = $(window).asEventStream('keyup');
-  var space$ = streams.getSpaceStream(keyUp$);
+  var space$ = streams.getKeyStream(keyUp$, constants.KEYBOARD_KEYS.SPACE);
   var dimensions$ = streams.getDimensionsStream(
     $(window).asEventStream('load'),
     $(window).asEventStream('resize')
@@ -37,8 +40,17 @@ function main(){
                       .skipUntil(direction$)
                       .filter(gameActive$$)
                       .filter(paused$$.not());
+  var direction$$ = direction$.toProperty();
+  var head$ = Bacon.update(
+    null,
+    [gameStart$], R.nAry(0, getAvailablePosition),
+    [direction$, ticks$], helpers.getNextHeadPosition,
+    [direction$$, ticks$], helpers.getNextHeadPosition
+  )
+  .skipDuplicates()
+  .changes();
 
-  var snakeAndFood = getSnakeAndFood(direction$, ticks$, gameStart$);
+  var snakeAndFood = getSnakeAndFood(head$, gameStart$);
   var snake$$ = snakeAndFood.snake$$;
   var food$$ = snakeAndFood.food$$;
 
@@ -49,7 +61,7 @@ function main(){
   Bacon
   .onValues(dimensions$, snake$$, food$$, function(dimensions, snake, food){
     render(dimensions, snake, food);
-    if(snake && helper.isThereCollision(snake, config.COLS, config.ROWS)){
+    if(snake && helpers.isThereCollision(snake, config.COLS, config.ROWS)){
      gameEnd$.push(Date.now());
     }
   });

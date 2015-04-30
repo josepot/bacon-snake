@@ -14,9 +14,7 @@ function getAvailablePosition(snakePositions, cols, rows) {
         });
       })
     ).filter(function(position) {
-      return !R.containsWith(function(a, b) {
-        return a.x === b.x && a.y === b.y;
-      }, position, snakePositions);
+      return !R.containsWith(R.eqDeep, position, snakePositions);
     });
   var selected = Math.floor(Math.random() * candidates.length);
   return candidates[selected];
@@ -28,16 +26,14 @@ function isThereCollision(snake, cols, rows) {
     lastPosition.x >= cols || lastPosition.y >= rows) {
     return true;
   }
-  return R.containsWith(function(a, b) {
-    return a.x === b.x && a.y === b.y;
-  }, lastPosition, snake.slice(1).toArray());
+  return R.containsWith(R.eqDeep, lastPosition, snake.slice(1).toArray());
 }
 function getNextHeadPosition(prev, direction, ticks){
-  if(R.isNil(direction)) return prev;
-  return R.evolve(
-    R.mapObj(R.add, constants.DIRECTIONS_MUTATIONS[direction]),
-    prev
-  );
+  return R.isNil(direction) ?
+            prev :
+            R.evolve(
+              R.mapObj(R.add, constants.DIRECTIONS_MUTATIONS[direction]), prev
+            );
 }
 
 module.exports = {

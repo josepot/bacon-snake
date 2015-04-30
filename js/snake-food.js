@@ -13,19 +13,7 @@ var increaseIfBufferIsNotEmpty = R.cond(
   [R.T, R.pipe(R.nthArg(1),R.add(1))]
 );
 
-function snakeAndFood(direction$, ticks$, gameStart$){
-  var direction$$ = direction$.toProperty();
-
-  //the position of the head of the snake
-  var head$ = Bacon.update(
-    null,
-    [gameStart$], R.nAry(0, R.partial(getAvailablePosition, [])),
-    [direction$, ticks$], helpers.getNextHeadPosition,
-    [direction$$, ticks$], helpers.getNextHeadPosition
-  )
-  .skipDuplicates()
-  .changes();
-
+function snakeAndFood(head$, gameStart$){
   //this is actually a 'stepper' of the food that gets eaten by the snake
   var eatenFood$ = new Bacon.Bus();
 
