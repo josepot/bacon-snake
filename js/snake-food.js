@@ -7,11 +7,11 @@ var helpers = require('./helpers.js');
 
 var getAvailablePosition =
   R.partialRight(helpers.getAvailablePosition, config.COLS, config.ROWS);
-var decreaseUntilZero = R.pipe(R.dec, R.curryN(2, Math.max)(0));
 var increaseIfBufferIsNotEmpty = R.cond(
   [R.gt(1), R.nthArg(1)],
   [R.T, R.pipe(R.nthArg(1),R.add(1))]
 );
+var snakeToArray = R.pipe(R.bind(Immutable.List.prototype.toArray), R.call);
 
 function snakeAndFood(head$, gameStart$){
   //this is actually a 'stepper' of the food that gets eaten by the snake
@@ -24,7 +24,7 @@ function snakeAndFood(head$, gameStart$){
   var growthBuffer$$ = Bacon.update(
     0-(config.FOOD_INCREASE+1),
     [head$, gameStart$], R.always(0-(config.FOOD_INCREASE+1)),
-    [eatenFood$], R.add(config.FOOD_INCREASE+1),
+    [eatenFood$], R.add(config.FOOD_INCREASE + 1),
     [head$], R.cond([R.gt(1), R.identity], [R.T, R.dec])
   ).skipDuplicates();
 
@@ -52,19 +52,17 @@ function snakeAndFood(head$, gameStart$){
   //the position of food
   var food$$ = Bacon.update(
     null,
-    [snake$$, head$, gameStart$], function(old, snake){
-                                   return getAvailablePosition(snake.toArray());
-    },
-    [head$, snake$$], function(food, head, snake){
-      return R.eqDeep(food, head) ?
-              getAvailablePosition(snake.toArray()) :
-              food;
-    }
+    [snake$$, head$, gameStart$], R.flip(R.compose(
+      getAvailablePosition, snakeToArray)),
+    [head$, snake$$], R.cond(
+      [R.eqDeep, R.compose(getAvailablePosition, snakeToArray, R.nthArg(2))],
+      [R.T, R.identity]
+    )
   ).skipDuplicates();
 
   //if the food changes that means that the snake has eaten,
   //therefore we need to plug these changes to 'eatenFood$'
-  eatenFood$.plug(food$$.changes().filter(R.pipe(R.isNil,R.not)));
+  eatenFood$.plug(food$$);
 
   return {
     snake$$: snake$$,
