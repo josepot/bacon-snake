@@ -17,7 +17,7 @@ function isThereCollision(snake, cols, rows) {
          lastPosition.x >= cols || lastPosition.y >= rows ||
          snake.slice(1).some(R.eqDeep(lastPosition));
 }
-function getNextHeadPosition(prev, direction, ticks){
+function getNextHeadPosition(prev, direction){
   return R.isNil(direction) ?
             prev :
             R.evolve(
