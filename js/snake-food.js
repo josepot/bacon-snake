@@ -11,7 +11,6 @@ var increaseIfBufferIsNotEmpty = R.cond(
   [R.gt(1), R.nthArg(1)],
   [R.T, R.pipe(R.nthArg(1),R.add(1))]
 );
-var snakeToArray = R.pipe(R.bind(Immutable.List.prototype.toArray), R.call);
 
 function snakeAndFood(head$, gameStart$){
   //this is actually a 'stepper' of the food that gets eaten by the snake
@@ -52,10 +51,9 @@ function snakeAndFood(head$, gameStart$){
   //the position of food
   var food$$ = Bacon.update(
     null,
-    [snake$$, head$, gameStart$], R.flip(R.compose(
-      getAvailablePosition, snakeToArray)),
+    [snake$$, head$, gameStart$], R.compose(getAvailablePosition, R.nthArg(1)),
     [head$, snake$$], R.cond(
-      [R.eqDeep, R.compose(getAvailablePosition, snakeToArray, R.nthArg(2))],
+      [R.eqDeep, R.compose(getAvailablePosition, R.nthArg(2))],
       [R.T, R.identity]
     )
   ).skipDuplicates();
