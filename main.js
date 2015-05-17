@@ -1,4 +1,5 @@
 var Bacon = require('baconjs');
+var Immutable = require('immutable');
 var R = require('ramda');
 
 var config = require('./js/config.js');
@@ -7,8 +8,8 @@ var helpers = require('./js/helpers.js');
 var streams = require('./js/streams-generator.js');
 var getSnakeAndFood = require('./js/snake-food.js');
 var renderer = require('./js/render.js');
-var getAvailablePosition =
-  R.partial(helpers.getAvailablePosition,[] ,config.COLS, config.ROWS);
+var getRandomPosition = R.partial(helpers.getAvailablePosition,
+                                  Immutable.List(), config.COLS, config.ROWS);
 
 /**************************************************
  *         VARIABLES NAMING CONVENTION            *
@@ -37,7 +38,7 @@ function main(){
                       .filter(paused$$.not());
   var head$ = Bacon.update(
     null,
-    [gameStart$], R.nAry(0, getAvailablePosition),
+    [gameStart$], R.nAry(0, getRandomPosition),
     [direction$, ticks$], helpers.getNextHeadPosition,
     [direction$$, ticks$], helpers.getNextHeadPosition
   )

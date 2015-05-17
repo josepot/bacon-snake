@@ -2,31 +2,20 @@ var R = require('ramda');
 var constants = require('./constants.js');
 
 function getAvailablePosition(snakePositions, cols, rows) {
-  var candidates =
-    R.flatten(
-      R.range(0, cols)
-      .map(function(column) {
-        return R.range(0, rows).map(function(row) {
-          return {
-            x: column,
-            y: row
-          };
-        });
-      })
-    ).filter(function(position) {
-      return !R.containsWith(R.eqDeep, position, snakePositions);
-    });
-  var selected = Math.floor(Math.random() * candidates.length);
-  return candidates[selected];
+  var nAvailablePositions = (cols * rows) - snakePositions.size;
+  var winner = Math.floor(Math.random() * nAvailablePositions);
+  var sortedSnake = snakePositions.map(function(s){
+    return (s.y * cols) + s.x;
+  }).sort(R.comparator(R.lt));
+  for(var i=0; i<sortedSnake.size && sortedSnake.get(i)<=winner; i++) winner++;
+  return {x: winner%cols, y: (winner/cols)|0 };
 }
 
 function isThereCollision(snake, cols, rows) {
   var lastPosition = snake.get(0);
-  if (lastPosition.x < 0 || lastPosition.y < 0 ||
-    lastPosition.x >= cols || lastPosition.y >= rows) {
-    return true;
-  }
-  return R.containsWith(R.eqDeep, lastPosition, snake.slice(1).toArray());
+  return lastPosition.x < 0 || lastPosition.y < 0 ||
+         lastPosition.x >= cols || lastPosition.y >= rows ||
+         snake.slice(1).some(R.eqDeep(lastPosition));
 }
 function getNextHeadPosition(prev, direction, ticks){
   return R.isNil(direction) ?
