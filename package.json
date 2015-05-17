@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/karma/bin/karma start ./karma.conf.js --no-auto-watch --single-run",
+    "dev-test": "./node_modules/karma/bin/karma start ./karma.conf.js",
+    "build": "./node_modules/browserify/bin/cmd.js ./main.js -o ./bundle.js",
+    "watch": "./node_modules/watchify/bin/cmd.js ./main.js -o ./bundle.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,5 +16,21 @@
     "immutable": "^3.7.2",
     "q": "^1.2.0",
     "ramda": "^0.13.0"
+  },
+  "devDependencies": {
+    "browserify": "^10.2.0",
+    "chai": "^2.3.0",
+    "karma": "^0.12.31",
+    "karma-browserify": "^4.1.2",
+    "karma-chai": "^0.1.0",
+    "karma-chai-plugins": "^0.5.0",
+    "karma-chrome-launcher": "^0.1.12",
+    "karma-cli": "0.0.4",
+    "karma-fixture": "^0.2.3",
+    "karma-mocha": "^0.1.10",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "karma-story-reporter": "^0.3.1",
+    "mocha": "^2.2.5",
+    "watchify": "^3.2.1"
   }
 }
