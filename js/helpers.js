@@ -1,3 +1,5 @@
+'use strict';
+
 var R = require('ramda');
 var constants = require('./constants.js');
 
@@ -7,8 +9,10 @@ function getAvailablePosition(snakePositions, cols, rows) {
   var sortedSnake = snakePositions.map(function(s){
     return (s.y * cols) + s.x;
   }).sort(R.comparator(R.lt));
-  for(var i=0; i<sortedSnake.size && sortedSnake.get(i)<=winner; i++) winner++;
-  return {x: winner%cols, y: (winner/cols)|0 };
+  for(var i=0; i < sortedSnake.size && sortedSnake.get(i) <= winner; i++){
+    winner++;
+  }
+  return {x: winner%cols, y: Math.floowr(winner/cols)};
 }
 
 function isThereCollision(snake, cols, rows) {
@@ -17,6 +21,7 @@ function isThereCollision(snake, cols, rows) {
          lastPosition.x >= cols || lastPosition.y >= rows ||
          snake.slice(1).some(R.eqDeep(lastPosition));
 }
+
 function getNextHeadPosition(prev, direction){
   return R.isNil(direction) ?
             prev :

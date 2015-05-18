@@ -1,3 +1,5 @@
+'use strict';
+
 var Bacon = require('baconjs');
 var Immutable = require('immutable');
 var R = require('ramda');

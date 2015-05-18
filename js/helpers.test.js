@@ -1,3 +1,5 @@
+'use strict';
+
 var h = require('./helpers.js');
 var Immutable = require('immutable');
 var R = require('ramda');

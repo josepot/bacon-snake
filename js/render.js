@@ -1,3 +1,5 @@
+'use strict';
+
 var R = require('ramda');
 var config = require('./config.js');
 
@@ -22,7 +24,7 @@ function renderLength(ctx, fontSize, textPosition, length) {
   ctx.font = (fontSize / 3) + 'pt Montserrat';
   ctx.textAlign = 'left';
   ctx.fillStyle = COLORS.TEXT;
-  ctx.fillText("SCORE: " + length, textPosition.x, textPosition.y);
+  ctx.fillText('SCORE: ' + length, textPosition.x, textPosition.y);
 }
 
 function renderSnake(ctx, squareLength, left, top, snake) {
@@ -60,8 +62,9 @@ function render(ctx, dimensions, snake, food) {
   renderGamePort(ctx, config.ROWS, config.COLS, d.squareLength,
     gamePortLeft, gamePortTop);
 
-  if(!R.isNil(food))
+  if(!R.isNil(food)){
     renderFood(ctx, d.squareLength, gamePortLeft, gamePortTop, food);
+  }
   if(!R.isNil(snake)){
     renderSnake(ctx, d.squareLength, gamePortLeft, gamePortTop, snake);
     renderLength(ctx, d.fontSize, d.textPosition, snake.size);

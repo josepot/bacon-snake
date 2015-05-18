@@ -1,3 +1,5 @@
+'use strict';
+
 var Bacon = require('baconjs');
 var R = require('ramda');
 var getdimensions = require('./dimensions.js');

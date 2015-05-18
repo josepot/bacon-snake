@@ -1,3 +1,5 @@
+'use srict';
+
 var config = {
   ROWS: 20,
   COLS: 30,
