@@ -23,8 +23,8 @@ function snakeAndFood(head$, gameStart$) {
   //is supposed to grow. The buffer will decrease as the snake moves and
   //it will increase every time the snake eats
   var growthBuffer$$ = Bacon.update(
-    0-(config.FOOD_INCREASE+1),
-    [head$, gameStart$], R.always(0-(config.FOOD_INCREASE+1)),
+    0 - (config.FOOD_INCREASE + 1),
+    [head$, gameStart$], R.always(0 - (config.FOOD_INCREASE + 1)),
     [eatenFood$], R.add(config.FOOD_INCREASE + 1),
     [head$], R.cond([R.gt(1), R.identity], [R.T, R.dec])
   ).skipDuplicates();
