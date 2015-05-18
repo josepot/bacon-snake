@@ -9,10 +9,10 @@ function getAvailablePosition(snakePositions, cols, rows) {
   var sortedSnake = snakePositions.map(function(s){
     return (s.y * cols) + s.x;
   }).sort(R.comparator(R.lt));
-  for(var i=0; i < sortedSnake.size && sortedSnake.get(i) <= winner; i++){
+  for (var i=0; i < sortedSnake.size && sortedSnake.get(i) <= winner; i++) {
     winner++;
   }
-  return {x: winner%cols, y: Math.floowr(winner/cols)};
+  return {x: winner%cols, y: Math.floor(winner/cols)};
 }
 
 function isThereCollision(snake, cols, rows) {
@@ -22,7 +22,7 @@ function isThereCollision(snake, cols, rows) {
          snake.slice(1).some(R.eqDeep(lastPosition));
 }
 
-function getNextHeadPosition(prev, direction){
+function getNextHeadPosition(prev, direction) {
   return R.isNil(direction) ?
             prev :
             R.evolve(

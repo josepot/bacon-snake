@@ -20,7 +20,7 @@ var getRandomPosition = R.partial(helpers.getAvailablePosition,
  * Properties end with $$, i.e: `game$$`          *
  * ************************************************/
 
-function main(){
+function main() {
   var gameStart$ = new Bacon.Bus();
   var gameEnd$ = new Bacon.Bus();
   var gameEvents$ = gameStart$.map('START').merge(gameEnd$.map('END'));
