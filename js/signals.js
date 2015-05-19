@@ -1,20 +1,74 @@
 'use strict';
 
 var Bacon = require('baconjs');
-var Immutable = require('immutable');
 var R = require('ramda');
-var constants = require('./constants.js');
+var Immutable = require('immutable');
+
 var config = require('./config.js');
-var helpers = require('./helpers.js');
+var constants = require('./constants.js');
+var M  = require('./modulators.js');
 
 var getAvailablePosition =
-  R.partialRight(helpers.getAvailablePosition, config.COLS, config.ROWS);
+  R.partialRight(M.getAvailablePosition, config.COLS, config.ROWS);
 var increaseIfBufferIsNotEmpty = R.cond(
   [R.gt(1), R.nthArg(1)],
   [R.T, R.pipe(R.nthArg(1),R.add(1))]
 );
+var getRandomPosition = R.partial(M.getAvailablePosition,
+                                  Immutable.List(), config.COLS, config.ROWS);
 
-function snakeAndFood(head$, gameStart$) {
+function getDimensions$(load$, resize$) {
+  return load$.merge(resize$)
+    .map(function (){
+      return {
+        width: window.innerWidth * 2,
+        height: window.innerHeight * 2
+      };
+    })
+    .map(M.getDimensions);
+}
+
+function getKey$(keyUp$, key) {
+  return keyUp$
+    .filter(R.pipe(R.prop('which'), R.eq(key)));
+}
+
+function getHead$(gameStart$, ticks$, direction$){
+  var direction$$ = direction$.toProperty();
+  return Bacon.update(
+    null,
+    [gameStart$], R.nAry(0, getRandomPosition),
+    [direction$, ticks$], M.getNextHeadPosition,
+    [direction$$, ticks$], M.getNextHeadPosition
+  ).changes();
+}
+
+function getDirection$(keyUp$, gameEnd$) {
+  var direction$ = keyUp$.map(
+    R.pipe(R.prop('which'), R.flip(R.prop)(constants.KEYBOARD_DIRECTIONS))
+  )
+  .filter(R.compose(R.not, R.isNil))
+  .merge(gameEnd$.map(null))
+  .skipDuplicates();
+
+  return direction$.diff(null, function(prev, last) {
+    var lastTwo = [prev, last].sort().join('-');
+    return (['LEFT-RIGHT', 'DOWN-UP'].indexOf(lastTwo) > -1) ?
+              'SKIP':
+              last;
+  })
+  .filter(R.compose(R.not, R.eq('SKIP')))
+  .changes();
+}
+
+function getTicks$(ms) {
+  var start = Date.now();
+  return Bacon.repeat(function() {
+    return Bacon.later(ms, Date.now()-start);
+  });
+}
+
+function getSnakeAndFood$$(head$, gameStart$) {
   //this is actually a 'stepper' of the food that gets eaten by the snake
   var eatenFood$ = new Bacon.Bus();
 
@@ -70,4 +124,11 @@ function snakeAndFood(head$, gameStart$) {
   };
 }
 
-module.exports = snakeAndFood;
+module.exports = {
+  getDimensions$: getDimensions$,
+  getHead$: getHead$,
+  getKey$: getKey$,
+  getDirection$: getDirection$,
+  getTicks$: getTicks$,
+  getSnakeAndFood$$: getSnakeAndFood$$
+};

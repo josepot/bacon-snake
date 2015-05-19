@@ -1,7 +1,7 @@
 'use strict';
 
 var Bacon = require('baconjs');
-var snakeAndFood = require('./snake-food.js');
+var signals = require('./signals.js');
 var R = require('ramda');
 var config = require('./config.js');
 
@@ -14,7 +14,7 @@ describe('snake and food properties', function() {
   beforeEach(function() {
     head$ = new Bacon.Bus();
     gameStart$ = new Bacon.Bus();
-    var sf = snakeAndFood(head$, gameStart$);
+    var sf = signals.getSnakeAndFood$$(head$, gameStart$);
     food$$ = sf.food$$;
     snake$$ = sf.snake$$;
   });
