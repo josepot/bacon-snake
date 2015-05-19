@@ -20,18 +20,19 @@ function main() {
     $(window).asEventStream('load'),
     $(window).asEventStream('resize')
   );
+  var keyUp$ = $(window).asEventStream('keyup');
+  var space$ = signals.getKey$(keyUp$, constants.KEYBOARD_KEYS.SPACE);
+
   var gameStart$ = new Bacon.Bus();
   var gameEnd$ = new Bacon.Bus();
   var gameEvents$ = gameStart$.map('START').merge(gameEnd$.map('END'));
+
   var gameActive$$ = gameEvents$.scan(false, R.flip(R.eq('START')));
-
-  var keyUp$ = $(window).asEventStream('keyup');
-  var space$ = signals.getKey$(keyUp$, constants.KEYBOARD_KEYS.SPACE);
   var paused$$ = space$.filter(gameActive$$).scan(false, R.not);
+  var keyUpDuringUnPausedGame$ = keyUp$.filter(gameActive$$)
+                                       .filter(paused$$.not());
 
-  var direction$ = signals.getDirection$(keyUp$.filter(gameActive$$)
-                                                    .filter(paused$$.not()),
-                                              gameEnd$);
+  var direction$ = signals.getDirection$(keyUpDuringUnPausedGame$, gameEnd$);
 
   var ticks$ = signals.getTicks$(config.TICK_FREQUENCY)
                       .skipUntil(direction$)
@@ -43,9 +44,6 @@ function main() {
   var snake$$ = snake$$AndFood$$.snake$$;
   var food$$ = snake$$AndFood$$.food$$;
 
-  var collisions$ = signals.getCollisions$(snake$$);
-  gameEnd$.plug(collisions$);
-
   var ctx = $('canvas')[0].getContext('2d');
   var render = renderer(ctx);
   Bacon
@@ -53,8 +51,10 @@ function main() {
     render(dimensions, snake, food);
   });
 
-  gameStart$.push(Date.now());
+  var collisions$ = signals.getCollisions$(snake$$);
+  gameEnd$.plug(collisions$);
   gameStart$.plug(space$.filter(gameActive$$.not()).map(Date.now()));
+  gameStart$.push(Date.now());
 }
 
 $(main);

@@ -52,12 +52,14 @@ function getHead$(gameStart$, ticks$, direction$){
 }
 
 function getDirection$(keyUp$, gameEnd$) {
-  var direction$ = keyUp$.map(
-    R.pipe(R.prop('which'), R.flip(R.prop)(constants.KEYBOARD_DIRECTIONS))
-  )
-  .filter(R.compose(R.not, R.isNil))
-  .merge(gameEnd$.map(null))
-  .skipDuplicates();
+  var direction$ =
+    keyUp$.map(R.pipe(
+            R.prop('which'),
+            R.flip(R.prop)(constants.KEYBOARD_DIRECTIONS)
+          ))
+          .filter(R.compose(R.not, R.isNil))
+          .merge(gameEnd$.map(null))
+          .skipDuplicates();
 
   return direction$.diff(null, function(prev, last) {
     var lastTwo = [prev, last].sort().join('-');
