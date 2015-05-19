@@ -34,8 +34,8 @@ describe('snake and food properties', function() {
 
     it('shouldnt trigger a change before gameStart and head streams start',
        function() {
-         expect(snake).to.be.null;
-         expect(food).to.be.null;
+         expect(snake).to.not.exist;
+         expect(food).to.not.exist;
        });
 
     describe('gameStart$ and head$ eventStreams get initial values', function(){
