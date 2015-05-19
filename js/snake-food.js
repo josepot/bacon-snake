@@ -1,3 +1,5 @@
+'use strict';
+
 var Bacon = require('baconjs');
 var Immutable = require('immutable');
 var R = require('ramda');
@@ -12,7 +14,7 @@ var increaseIfBufferIsNotEmpty = R.cond(
   [R.T, R.pipe(R.nthArg(1),R.add(1))]
 );
 
-function snakeAndFood(head$, gameStart$){
+function snakeAndFood(head$, gameStart$) {
   //this is actually a 'stepper' of the food that gets eaten by the snake
   var eatenFood$ = new Bacon.Bus();
 
@@ -21,8 +23,8 @@ function snakeAndFood(head$, gameStart$){
   //is supposed to grow. The buffer will decrease as the snake moves and
   //it will increase every time the snake eats
   var growthBuffer$$ = Bacon.update(
-    0-(config.FOOD_INCREASE+1),
-    [head$, gameStart$], R.always(0-(config.FOOD_INCREASE+1)),
+    0 - (config.FOOD_INCREASE + 1),
+    [head$, gameStart$], R.always(0 - (config.FOOD_INCREASE + 1)),
     [eatenFood$], R.add(config.FOOD_INCREASE + 1),
     [head$], R.cond([R.gt(1), R.identity], [R.T, R.dec])
   ).skipDuplicates();
@@ -39,8 +41,8 @@ function snakeAndFood(head$, gameStart$){
   //(including its head)
   var snake$$ = Bacon.update(
     null,
-    [head$, gameStart$], function(old, head){return Immutable.List.of(head);},
-    [head$, length$$], function(old, head, len){
+    [head$, gameStart$], function(old, head) { return Immutable.List.of(head);},
+    [head$, length$$], function(old, head, len) {
       var result = old.unshift(head);
       return len === result.size ?
               result :

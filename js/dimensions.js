@@ -1,3 +1,5 @@
+'use strict';
+
 var Bacon = require('baconjs');
 var config = require('./config.js');
 

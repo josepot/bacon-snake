@@ -1,3 +1,5 @@
+'use strict';
+
 var Bacon = require('baconjs');
 var R = require('ramda');
 var getdimensions = require('./dimensions.js');
@@ -5,7 +7,7 @@ var config = require('./config.js');
 var constants = require('./constants.js');
 var helpers = require('./helpers.js');
 
-function getDimensionsStream(load$, resize$){
+function getDimensionsStream(load$, resize$) {
   return load$.merge(resize$)
     .map(function (){
       return {
@@ -16,12 +18,12 @@ function getDimensionsStream(load$, resize$){
     .map(getdimensions);
 }
 
-function getKeyStream(keyUp$, key){
+function getKeyStream(keyUp$, key) {
   return keyUp$
     .filter(R.pipe(R.prop('which'), R.eq(key)));
 }
 
-function getDirectionStream(keyUp$, gameEnd$){
+function getDirectionStream(keyUp$, gameEnd$) {
   var direction$ = keyUp$.map(
     R.pipe(R.prop('which'), R.flip(R.prop)(constants.KEYBOARD_DIRECTIONS))
   )
@@ -29,7 +31,7 @@ function getDirectionStream(keyUp$, gameEnd$){
   .merge(gameEnd$.map(null))
   .skipDuplicates();
 
-  return direction$.diff(null, function(prev, last){
+  return direction$.diff(null, function(prev, last) {
     var lastTwo = [prev, last].sort().join('-');
     return (['LEFT-RIGHT', 'DOWN-UP'].indexOf(lastTwo) > -1) ?
               'SKIP':
@@ -39,9 +41,9 @@ function getDirectionStream(keyUp$, gameEnd$){
   .changes();
 }
 
-function getTicksStream(ms){
+function getTicksStream(ms) {
   var start = Date.now();
-  return Bacon.repeat(function(){
+  return Bacon.repeat(function() {
     return Bacon.later(ms, Date.now()-start);
   });
 }
