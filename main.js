@@ -8,6 +8,7 @@ var constants = require('./js/constants.js');
 var signals = require('./js/signals.js');
 var M = require('./js/modulators.js');
 var renderer = require('./js/render.js');
+
 /**************************************************
  *         VARIABLES NAMING CONVENTION            *
  *         ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾            *
@@ -44,15 +45,10 @@ function main() {
   var snake$$ = snake$$AndFood$$.snake$$;
   var food$$ = snake$$AndFood$$.food$$;
 
-  var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
-  var render = renderer(ctx);
-  Bacon
-  .onValues(dimensions$, snake$$, food$$, function(dimensions, snake, food){
-    render(dimensions, snake, food);
-  });
+  var ctx = document.getElementById('canvas').getContext('2d');
+  Bacon.onValues(dimensions$, snake$$, food$$, renderer(ctx));
 
-  var collisions$ = signals.getCollisions$(snake$$);
-  gameEnd$.plug(collisions$);
+  gameEnd$.plug(signals.getCollisions$(snake$$));
   gameStart$.plug(space$.filter(gameActive$$.not()).map(Date.now()));
   gameStart$.push(Date.now());
 }
