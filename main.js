@@ -43,14 +43,14 @@ function main() {
   var snake$$ = snake$$AndFood$$.snake$$;
   var food$$ = snake$$AndFood$$.food$$;
 
+  var collisions$ = signals.getCollisions$(snake$$);
+  gameEnd$.plug(collisions$);
+
   var ctx = $('canvas')[0].getContext('2d');
   var render = renderer(ctx);
   Bacon
   .onValues(dimensions$, snake$$, food$$, function(dimensions, snake, food){
     render(dimensions, snake, food);
-    if(snake && M.isThereCollision(snake, config.COLS, config.ROWS)){
-     gameEnd$.push(Date.now());
-    }
   });
 
   gameStart$.push(Date.now());

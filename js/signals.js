@@ -17,6 +17,14 @@ var increaseIfBufferIsNotEmpty = R.cond(
 var getRandomPosition = R.partial(M.getAvailablePosition,
                                   Immutable.List(), config.COLS, config.ROWS);
 
+function getCollisions$(snake$$){
+  return snake$$.filter(
+    R.partialRight(M.isThereCollision, config.COLS, config.ROWS)
+  )
+  .map(Date.now())
+  .changes();
+}
+
 function getDimensions$(load$, resize$) {
   return load$.merge(resize$)
     .map(function (){
@@ -102,7 +110,7 @@ function getSnakeAndFood$$(head$, gameStart$) {
               result :
               result.pop();
     }
-  );
+  ).filter(R.compose(R.not, R.isNil));
 
   //the position of food
   var food$$ = Bacon.update(
@@ -130,5 +138,6 @@ module.exports = {
   getKey$: getKey$,
   getDirection$: getDirection$,
   getTicks$: getTicks$,
-  getSnakeAndFood$$: getSnakeAndFood$$
+  getSnakeAndFood$$: getSnakeAndFood$$,
+  getCollisions$: getCollisions$
 };
