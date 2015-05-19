@@ -66,17 +66,17 @@ function isThereCollision(snake, cols, rows) {
          snake.slice(1).some(R.eqDeep(lastPosition));
 }
 
-function getNextHeadPosition(prev, direction) {
+function getNextHead(current, direction) {
   return R.isNil(direction) ?
-            prev :
-            R.evolve(
-              R.mapObj(R.add, constants.DIRECTIONS_MUTATIONS[direction]), prev
-            );
+    current :
+    R.evolve(
+      R.mapObj(R.add, constants.DIRECTIONS_MUTATIONS[direction]), current
+    );
 }
 
 module.exports = {
   getDimensions: getDimensions,
   getAvailablePosition: getAvailablePosition,
   isThereCollision: isThereCollision,
-  getNextHeadPosition: getNextHeadPosition
+  getNextHead: getNextHead
 };

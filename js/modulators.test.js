@@ -71,18 +71,18 @@ describe('Modulators', function(){
     });
   });
 
-  describe('getNextHeadPosition', function(){
+  describe('getNextHead', function(){
     it('should return the previous position when direction is nil', function(){
       var head = {y:0, x:0};
-      expect(M.getNextHeadPosition(head)).to.equal(head);
+      expect(M.getNextHead(head)).to.equal(head);
     });
 
     it('should return the next position for the provided direction', function(){
       var head = {y:0, x:0};
-      expect(M.getNextHeadPosition(head, 'LEFT')).to.deep.equal({x:-1, y:0});
-      expect(M.getNextHeadPosition(head, 'RIGHT')).to.deep.equal({x:1, y:0});
-      expect(M.getNextHeadPosition(head, 'UP')).to.deep.equal({x:0, y:-1});
-      expect(M.getNextHeadPosition(head, 'DOWN')).to.deep.equal({x:0, y:1});
+      expect(M.getNextHead(head, 'LEFT')).to.deep.equal({x:-1, y:0});
+      expect(M.getNextHead(head, 'RIGHT')).to.deep.equal({x:1, y:0});
+      expect(M.getNextHead(head, 'UP')).to.deep.equal({x:0, y:-1});
+      expect(M.getNextHead(head, 'DOWN')).to.deep.equal({x:0, y:1});
     });
   });
 });

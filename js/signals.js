@@ -8,16 +8,16 @@ var config = require('./config.js');
 var constants = require('./constants.js');
 var M  = require('./modulators.js');
 
-var getAvailablePosition =
-  R.partialRight(M.getAvailablePosition, config.COLS, config.ROWS);
 var increaseIfBufferIsNotEmpty = R.cond(
   [R.gt(1), R.nthArg(1)],
   [R.T, R.pipe(R.nthArg(1),R.add(1))]
 );
+var getAvailablePosition =
+  R.partialRight(M.getAvailablePosition, config.COLS, config.ROWS);
 var getRandomPosition = R.partial(M.getAvailablePosition,
                                   Immutable.List(), config.COLS, config.ROWS);
 
-function getCollisions$(snake$$){
+function getCollision$(snake$$) {
   return snake$$.filter(
     R.partialRight(M.isThereCollision, config.COLS, config.ROWS)
   )
@@ -25,7 +25,7 @@ function getCollisions$(snake$$){
   .changes();
 }
 
-function getDimensions$(load$, resize$) {
+function getDimension$(load$, resize$) {
   return load$.merge(resize$)
     .map(function (){
       return {
@@ -41,13 +41,13 @@ function getKey$(keyUp$, key) {
     .filter(R.pipe(R.prop('which'), R.eq(key)));
 }
 
-function getHead$(gameStart$, ticks$, direction$){
+function getHead$(gameStart$, tick$, direction$){
   var direction$$ = direction$.toProperty();
   return Bacon.update(
     null,
     [gameStart$], R.nAry(0, getRandomPosition),
-    [direction$, ticks$], M.getNextHeadPosition,
-    [direction$$, ticks$], M.getNextHeadPosition
+    [direction$, tick$], M.getNextHead,
+    [direction$$, tick$], M.getNextHead
   ).changes();
 }
 
@@ -71,10 +71,10 @@ function getDirection$(keyUp$, gameEnd$) {
   .changes();
 }
 
-function getTicks$(ms) {
+function getTick$(ms) {
   var start = Date.now();
   return Bacon.repeat(function() {
-    return Bacon.later(ms, Date.now()-start);
+    return Bacon.later(ms, Date.now() - start);
   });
 }
 
@@ -135,11 +135,11 @@ function getSnakeAndFood$$(head$, gameStart$) {
 }
 
 module.exports = {
-  getDimensions$: getDimensions$,
+  getDimension$: getDimension$,
   getHead$: getHead$,
   getKey$: getKey$,
   getDirection$: getDirection$,
-  getTicks$: getTicks$,
+  getTick$: getTick$,
   getSnakeAndFood$$: getSnakeAndFood$$,
-  getCollisions$: getCollisions$
+  getCollision$: getCollision$
 };
