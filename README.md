@@ -1,9 +1,8 @@
 # bacon-snake
 
-## install& build
+## install & build
 
 - npm install
-- bower install
 - npm run build
 
 ## instructions

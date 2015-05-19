@@ -17,10 +17,10 @@ var renderer = require('./js/render.js');
 
 function main() {
   var dimensions$ = signals.getDimensions$(
-    $(window).asEventStream('load'),
-    $(window).asEventStream('resize')
+    Bacon.fromEvent(window, 'load'),
+    Bacon.fromEvent(window, 'resize')
   );
-  var keyUp$ = $(window).asEventStream('keyup');
+  var keyUp$ = Bacon.fromEvent(window, 'keyup');
   var space$ = signals.getKey$(keyUp$, constants.KEYBOARD_KEYS.SPACE);
 
   var gameStart$ = new Bacon.Bus();
@@ -44,7 +44,7 @@ function main() {
   var snake$$ = snake$$AndFood$$.snake$$;
   var food$$ = snake$$AndFood$$.food$$;
 
-  var ctx = $('canvas')[0].getContext('2d');
+  var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
   var render = renderer(ctx);
   Bacon
   .onValues(dimensions$, snake$$, food$$, function(dimensions, snake, food){
@@ -57,4 +57,4 @@ function main() {
   gameStart$.push(Date.now());
 }
 
-$(main);
+document.addEventListener('DOMContentLoaded', main);
