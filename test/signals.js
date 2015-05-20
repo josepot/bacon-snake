@@ -1,9 +1,9 @@
 'use strict';
 
 var Bacon = require('baconjs');
-var signals = require('./signals.js');
 var R = require('ramda');
-var config = require('./config.js');
+var config = require('../js/config.js');
+var signals = require('../js/signals.js');
 
 describe('snake and food properties', function() {
   var head$;

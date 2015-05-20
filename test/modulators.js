@@ -1,8 +1,8 @@
 'use strict';
 
-var M = require('./modulators.js');
 var Immutable = require('immutable');
 var R = require('ramda');
+var M = require('../js/modulators.js');
 
 describe('Modulators', function(){
 
