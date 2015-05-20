@@ -22,7 +22,7 @@ function main() {
     Bacon.fromEvent(window, 'resize')
   );
   var keyUp$ = Bacon.fromEvent(window, 'keyup');
-  var space$ = signals.getKey$(keyUp$, constants.KEYBOARD_KEYS.SPACE);
+  var space$ = signals.getSpecificKey$(keyUp$, constants.KEYBOARD_KEYS.SPACE);
 
   var gameStart$ = new Bacon.Bus();
   var gameEnd$ = new Bacon.Bus();

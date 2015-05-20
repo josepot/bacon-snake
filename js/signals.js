@@ -9,9 +9,11 @@ var constants = require('./constants.js');
 var M  = require('./modulators.js');
 
 var increaseIfBufferIsNotEmpty = R.cond(
-  [R.gt(1), R.nthArg(1)],
-  [R.T, R.pipe(R.nthArg(1),R.add(1))]
+  [R.gt(R.__, 0), R.pipe(R.nthArg(1),R.add(1))],
+  [R.T, R.nthArg(1)]
 );
+var decreaseIfGreatterThanZero =
+  R.cond([R.gt(R.__, 0), R.dec], [R.T, R.identity]);
 var getAvailablePosition =
   R.partialRight(M.getAvailablePosition, config.COLS, config.ROWS);
 var getRandomPosition = R.partial(M.getAvailablePosition,
@@ -27,7 +29,7 @@ function getCollision$(snake$$) {
 
 function getDimension$(load$, resize$) {
   return load$.merge(resize$)
-    .map(function (){
+    .map(function () {
       return {
         width: window.innerWidth * 2,
         height: window.innerHeight * 2
@@ -36,16 +38,15 @@ function getDimension$(load$, resize$) {
     .map(M.getDimensions);
 }
 
-function getKey$(keyUp$, key) {
-  return keyUp$
-    .filter(R.pipe(R.prop('which'), R.eq(key)));
+function getSpecificKey$(keyUp$, key) {
+  return keyUp$.filter(R.pipe(R.prop('which'), R.eq(key)));
 }
 
 function getHead$(gameStart$, tick$, direction$){
   var direction$$ = direction$.toProperty();
   return Bacon.update(
     null,
-    [gameStart$], R.nAry(0, getRandomPosition),
+    [gameStart$], getRandomPosition,
     [direction$, tick$], M.getNextHead,
     [direction$$, tick$], M.getNextHead
   ).changes();
@@ -55,7 +56,7 @@ function getDirection$(keyUp$, gameEnd$) {
   var direction$ =
     keyUp$.map(R.pipe(
             R.prop('which'),
-            R.flip(R.prop)(constants.KEYBOARD_DIRECTIONS)
+            R.partialRight(R.prop, constants.KEYBOARD_DIRECTIONS)
           ))
           .filter(R.compose(R.not, R.isNil))
           .merge(gameEnd$.map(null))
@@ -87,10 +88,10 @@ function getSnakeAndFood$$(head$, gameStart$) {
   //is supposed to grow. The buffer will decrease as the snake moves and
   //it will increase every time the snake eats
   var growthBuffer$$ = Bacon.update(
-    0 - (config.FOOD_INCREASE + 1),
-    [head$, gameStart$], R.always(0 - (config.FOOD_INCREASE + 1)),
-    [eatenFood$], R.add(config.FOOD_INCREASE + 1),
-    [head$], R.cond([R.gt(1), R.identity], [R.T, R.dec])
+    0,
+    [head$, gameStart$], R.always(0),
+    [head$, eatenFood$], R.add(config.FOOD_INCREASE),
+    [head$], decreaseIfGreatterThanZero
   ).skipDuplicates();
 
   //The current length of the snake
@@ -126,7 +127,7 @@ function getSnakeAndFood$$(head$, gameStart$) {
 
   //if the food changes that means that the snake has eaten,
   //therefore we need to plug these changes to 'eatenFood$'
-  eatenFood$.plug(food$$);
+  eatenFood$.plug(food$$.changes().skip(1));
 
   return {
     snake$$: snake$$,
@@ -137,7 +138,7 @@ function getSnakeAndFood$$(head$, gameStart$) {
 module.exports = {
   getDimension$: getDimension$,
   getHead$: getHead$,
-  getKey$: getKey$,
+  getSpecificKey$: getSpecificKey$,
   getDirection$: getDirection$,
   getTick$: getTick$,
   getSnakeAndFood$$: getSnakeAndFood$$,
