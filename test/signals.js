@@ -1,9 +1,57 @@
 'use strict';
 
 var Bacon = require('baconjs');
+var Immutable = require('immutable');
 var R = require('ramda');
 var config = require('../js/config.js');
 var signals = require('../js/signals.js');
+
+describe('collision stream', function() {
+  var snake$, collision$, latestCollision;
+  beforeEach(function(){
+    snake$ = new Bacon.Bus();
+    collision$ = signals.getCollision$(snake$.toProperty());
+    collision$.onValue(function(collision){
+      latestCollision = collision;
+    });
+  });
+  it('shouldn\'t generate a collision', function(){
+    snake$.push(Immutable.List.of(
+      {y:1, x:2},
+      {y:1, x:1},
+      {y:1, x:0},
+      {y:0, x:0},
+      {y:0, x:1},
+      {y:0, x:2},
+      {y:0, x:3}
+    ));
+    expect(latestCollision).to.not.exist;
+  });
+  it('should generate a collision', function(){
+    snake$.push(Immutable.List.of(
+      {y:1, x:2},
+      {y:1, x:1},
+      {y:1, x:0},
+      {y:0, x:0},
+      {y:0, x:1},
+      {y:0, x:2},
+      {y:1, x:2}
+    ));
+    expect(latestCollision).to.exist;
+  });
+  it('should generate a collision', function(){
+    snake$.push(Immutable.List.of(
+      {y:1, x:2},
+      {y:1, x:1},
+      {y:1, x:0},
+      {y:0, x:0},
+      {y:0, x:1},
+      {y:0, x:2},
+      {y:-1, x:2}
+    ));
+    expect(latestCollision).to.exist;
+  });
+});
 
 describe('snake and food properties', function() {
   var head$;

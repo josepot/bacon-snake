@@ -48,15 +48,18 @@ function getDimensions(rect) {
 }
 
 function getAvailablePosition(snakePositions, cols, rows) {
-  var nAvailablePositions = (cols * rows) - snakePositions.size;
+  var nSnakePositions = snakePositions && snakePositions.size || 0;
+  var nAvailablePositions = (cols * rows) - nSnakePositions;
   var winner = Math.floor(Math.random() * nAvailablePositions);
-  var sortedSnake = snakePositions.map(function(s){
-    return (s.y * cols) + s.x;
-  }).sort(R.comparator(R.lt));
-  for (var i=0; i < sortedSnake.size && sortedSnake.get(i) <= winner; i++) {
-    winner++;
+  if (nSnakePositions > 0) {
+    var sortedSnake = snakePositions.map(function(s) {
+      return (s.y * cols) + s.x;
+    }).sort(R.comparator(R.lt));
+    for (var i=0; sortedSnake.get(i) <= winner; i++) {
+      winner++;
+    }
   }
-  return {x: winner%cols, y: Math.floor(winner/cols)};
+  return {x: winner % cols, y: Math.floor(winner / cols)};
 }
 
 function isThereCollision(snake, cols, rows) {

@@ -7,23 +7,14 @@ var Immutable = require('immutable');
 var config = require('./config.js');
 var constants = require('./constants.js');
 var M  = require('./modulators.js');
-
-var increaseIfBufferIsNotEmpty = R.cond(
-  [R.gt(R.__, 0), R.pipe(R.nthArg(1),R.add(1))],
-  [R.T, R.nthArg(1)]
-);
-var decreaseIfGreatterThanZero =
-  R.cond([R.gt(R.__, 0), R.dec], [R.T, R.identity]);
 var getAvailablePosition =
   R.partialRight(M.getAvailablePosition, config.COLS, config.ROWS);
-var getRandomPosition = R.partial(M.getAvailablePosition,
-                                  Immutable.List(), config.COLS, config.ROWS);
 
 function getCollision$(snake$$) {
   return snake$$.filter(
     R.partialRight(M.isThereCollision, config.COLS, config.ROWS)
   )
-  .map(Date.now())
+  .map(Date.now)
   .changes();
 }
 
@@ -43,13 +34,15 @@ function getSpecificKey$(keyUp$, key) {
 }
 
 function getHead$(gameStart$, tick$, direction$){
-  var direction$$ = direction$.toProperty();
+ var getRandomPosition = R.partial(M.getAvailablePosition,
+                                  undefined, config.COLS, config.ROWS);
+ var direction$$ = direction$.toProperty();
   return Bacon.update(
     null,
     [gameStart$], getRandomPosition,
     [direction$, tick$], M.getNextHead,
     [direction$$, tick$], M.getNextHead
-  ).changes();
+  ).skipDuplicates().changes();
 }
 
 function getDirection$(keyUp$, gameEnd$) {
@@ -80,6 +73,8 @@ function getTick$(ms) {
 }
 
 function getSnakeAndFood$$(head$, gameStart$) {
+ var listOf = R.bind(Immutable.List.of, Immutable.List);
+
   //this is actually a 'stepper' of the food that gets eaten by the snake
   var eatenFood$ = new Bacon.Bus();
 
@@ -87,6 +82,8 @@ function getSnakeAndFood$$(head$, gameStart$) {
   //Therefore we need to keep a buffer that indicates how much more the snake
   //is supposed to grow. The buffer will decrease as the snake moves and
   //it will increase every time the snake eats
+  var decreaseIfGreatterThanZero =
+    R.cond([R.gt(R.__, 0), R.dec], [R.T, R.identity]);
   var growthBuffer$$ = Bacon.update(
     0,
     [head$, gameStart$], R.always(0),
@@ -95,6 +92,10 @@ function getSnakeAndFood$$(head$, gameStart$) {
   ).skipDuplicates();
 
   //The current length of the snake
+  var increaseIfBufferIsNotEmpty = R.cond(
+    [R.gt(R.__, 0), R.pipe(R.nthArg(1),R.add(1))],
+    [R.T, R.nthArg(1)]
+  );
   var length$$ = Bacon.update(
     1,
     [head$, gameStart$], R.always(1),
@@ -106,7 +107,7 @@ function getSnakeAndFood$$(head$, gameStart$) {
   //(including its head)
   var snake$$ = Bacon.update(
     null,
-    [head$, gameStart$], function(old, head) { return Immutable.List.of(head);},
+    [head$, gameStart$], R.compose(listOf, R.nthArg(1)),
     [head$, length$$], function(old, head, len) {
       var result = old.unshift(head);
       return len === result.size ?
@@ -116,18 +117,24 @@ function getSnakeAndFood$$(head$, gameStart$) {
   ).filter(R.compose(R.not, R.isNil));
 
   //the position of food
+  var getNewFoodPositionIfHeadHitsFood = R.cond(
+    [R.eqDeep, R.compose(getAvailablePosition, R.nthArg(2))],
+    [R.T, R.identity]
+  );
   var food$$ = Bacon.update(
     null,
     [snake$$, head$, gameStart$], R.compose(getAvailablePosition, R.nthArg(1)),
-    [head$, snake$$], R.cond(
-      [R.eqDeep, R.compose(getAvailablePosition, R.nthArg(2))],
-      [R.T, R.identity]
-    )
+    [head$, snake$$], getNewFoodPositionIfHeadHitsFood
   ).skipDuplicates();
 
   //if the food changes that means that the snake has eaten,
   //therefore we need to plug these changes to 'eatenFood$'
-  eatenFood$.plug(food$$.changes().skip(1));
+  var isInitialHead$$ = Bacon.update(
+    true,
+    [head$, gameStart$], true,
+    [head$], false
+  ).skipDuplicates();
+  eatenFood$.plug(food$$.filter(isInitialHead$$.not()));
 
   return {
     snake$$: snake$$,

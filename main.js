@@ -49,8 +49,9 @@ function main() {
   Bacon.onValues(dimension$, snake$$, food$$, renderer(ctx));
 
   gameEnd$.plug(signals.getCollision$(snake$$));
-  gameStart$.plug(space$.filter(gameActive$$.not()).map(Date.now()));
-  gameStart$.push(Date.now());
+  gameStart$.log();
+  gameStart$.plug(space$.filter(gameActive$$.not()).map(Date.now));
+  gameStart$.push(Date.now);
 }
 
 document.addEventListener('DOMContentLoaded', main);
