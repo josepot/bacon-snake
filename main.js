@@ -33,10 +33,11 @@ function main() {
   var keyUpDuringUnPausedGame$ = keyUp$.filter(gameActive$$)
                                        .filter(paused$$.not());
 
-  var direction$ = signals.getDirection$(keyUpDuringUnPausedGame$, gameEnd$);
+  var direction$ = signals.getDirection$(keyUpDuringUnPausedGame$, gameStart$)
+                          .filter(gameActive$$)
+                          .filter(paused$$.not());
 
   var tick$ = signals.getTick$(config.TICK_FREQUENCY)
-                      .skipUntil(direction$)
                       .filter(gameActive$$)
                       .filter(paused$$.not());
 
@@ -49,9 +50,8 @@ function main() {
   Bacon.onValues(dimension$, snake$$, food$$, renderer(ctx));
 
   gameEnd$.plug(signals.getCollision$(snake$$));
-  gameStart$.log();
   gameStart$.plug(space$.filter(gameActive$$.not()).map(Date.now));
-  gameStart$.push(Date.now);
+  gameStart$.push(Date.now());
 }
 
 document.addEventListener('DOMContentLoaded', main);

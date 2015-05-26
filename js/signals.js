@@ -45,14 +45,14 @@ function getHead$(gameStart$, tick$, direction$){
   ).skipDuplicates().changes();
 }
 
-function getDirection$(keyUp$, gameEnd$) {
+function getDirection$(keyUp$, gameStart$) {
   var direction$ =
     keyUp$.map(R.pipe(
             R.prop('which'),
             R.partialRight(R.prop, constants.KEYBOARD_DIRECTIONS)
           ))
           .filter(R.compose(R.not, R.isNil))
-          .merge(gameEnd$.map(null))
+          .merge(gameStart$.map(null))
           .skipDuplicates();
 
   return direction$.diff(null, function(prev, last) {
@@ -68,8 +68,10 @@ function getDirection$(keyUp$, gameEnd$) {
 function getTick$(ms) {
   var start = Date.now();
   return Bacon.repeat(function() {
-    return Bacon.later(ms, Date.now() - start);
-  });
+    return Bacon.fromCallback(window.requestAnimationFrame);
+  }).map(function(domMs) {
+    return (domMs / ms) | 0;
+  }).skipDuplicates();
 }
 
 function getSnakeAndFood$$(head$, gameStart$) {
