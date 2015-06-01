@@ -150,7 +150,7 @@ describe('snake and food properties', function() {
           });
 
           it('snake length should increase after the next changes', function() {
-            for(var i = 1; i<= config.FOOD_INCREASE; i++){
+            for(var i = 1; i<= config.FOOD_INCREASE; i++) {
               head$.push(R.evolve({x: R.add(i)}, firstFoodPosition));
               expect(snake).to.have.property('size').equal(i + 1);
             }
@@ -159,11 +159,27 @@ describe('snake and food properties', function() {
           });
 
           it('should stop increasing after FOOD_INCREASE changes', function() {
-            for(var i = 1; i<= config.FOOD_INCREASE + 1; i++){
+            for(var i = 1; i<= config.FOOD_INCREASE + 1; i++) {
               head$.push(R.evolve({x: R.add(i)}, firstFoodPosition));
             }
             expect(snake).to.have.property('size')
                                  .equal(config.FOOD_INCREASE + 1);
+          });
+
+          describe('head$ hits food$ immediately after the first hit', function() {
+            var secondFoodPosition;
+            beforeEach(function(){
+              secondFoodPosition = R.clone(food);
+              head$.push(food);
+            });
+
+            it('should increase 2 times FOOD_INCREASE', function(){
+              for(var i = 1; i<= (config.FOOD_INCREASE * 2) + 1; i++){
+                head$.push(R.evolve({x: R.add(i)}, secondFoodPosition));
+              }
+              expect(snake).to.have.property('size')
+              .equal((config.FOOD_INCREASE * 2) + 1);
+            });
           });
         });
       });

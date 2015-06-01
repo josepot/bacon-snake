@@ -70,7 +70,7 @@ function getTick$(ms) {
   return Bacon.repeat(function() {
     return Bacon.fromCallback(window.requestAnimationFrame);
   }).map(function(domMs) {
-    return (domMs / ms) | 0;
+    return Math.floor(domMs / ms);
   }).skipDuplicates();
 }
 
@@ -89,19 +89,20 @@ function getSnakeAndFood$$(head$, gameStart$) {
   var growthBuffer$$ = Bacon.update(
     0,
     [head$, gameStart$], R.always(0),
-    [head$, eatenFood$], R.add(config.FOOD_INCREASE),
+    [head$, eatenFood$], R.pipe(decreaseIfGreatterThanZero,
+                                R.add(config.FOOD_INCREASE)),
     [head$], decreaseIfGreatterThanZero
   ).skipDuplicates();
 
   //The current length of the snake
   var increaseIfBufferIsNotEmpty = R.cond(
-    [R.gt(R.__, 0), R.pipe(R.nthArg(1),R.add(1))],
-    [R.T, R.nthArg(1)]
+    [R.compose(R.gt(R.__, 0), R.nthArg(1)), R.add(1)],
+    [R.T, R.identity]
   );
   var length$$ = Bacon.update(
     1,
     [head$, gameStart$], R.always(1),
-    [growthBuffer$$, head$], R.flip(increaseIfBufferIsNotEmpty)
+    [growthBuffer$$, head$], increaseIfBufferIsNotEmpty
   ).skipDuplicates();
 
   //the latest "length$$" positions where the head of the snake has passed
